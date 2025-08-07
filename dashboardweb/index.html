@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dasbor Agen Lingkungan</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { color: #444; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Live Monitoring: Ketinggian Air Katulampa</h1>
+        <p>Sensor ID: <b id="sensor-id">clw-ktl-01</b></p>
+        <canvas id="sensorChart"></canvas>
+    </div>
+
+    <script>
+        const SENSOR_ID = 'clw-ktl-01';
+        const API_URL = `http://127.0.0.1:8000/sensors/${SENSOR_ID}/history`;
+
+        const ctx = document.getElementById('sensorChart').getContext('2d');
+        const sensorChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [], // Timestamp akan masuk ke sini
+                datasets: [{
+                    label: 'Ketinggian Air (cm)',
+                    data: [], // Nilai sensor akan masuk ke sini
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1,
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'second',
+                            displayFormats: { second: 'HH:mm:ss' }
+                        },
+                        title: { display: true, text: 'Waktu' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Ketinggian (cm)' }
+                    }
+                }
+            }
+        });
+
+        // Fungsi untuk mengambil data dan update grafik
+        async function updateChart() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) {
+                    console.error('Gagal mengambil data dari API');
+                    return;
+                }
+                const data = await response.json();
+
+                // Format data untuk Chart.js
+                const labels = data.map(item => new Date(item.timestamp));
+                const values = data.map(item => item.reading_value);
+
+                // Update data di grafik
+                sensorChart.data.labels = labels;
+                sensorChart.data.datasets[0].data = values;
+                sensorChart.update(); // Perbarui tampilan grafik
+                
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Panggil fungsi pertama kali
+        updateChart();
+        
+        // Atur agar grafik di-update setiap 5 detik (sama seperti interval simulator)
+        setInterval(updateChart, 5000);
+    </script>
+</body>
+</html>
