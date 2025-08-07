@@ -1,0 +1,75 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# =========================
+# Virtual Environments
+# =========================
+venv/
+.venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# =========================
+# VSCode / PyCharm
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# Jupyter Notebook Checkpoints
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# mypy / pyright / pytest
+# =========================
+.mypy_cache/
+.pytest_cache/
+.pytype/
+.cache/
+
+# =========================
+# Coverage / Reports
+# =========================
+htmlcov/
+coverage.xml
+*.cover
+.tox/
+.nox/
+reports/
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# dotenv / local settings
+# =========================
+.env
+.env.*
+*.env
+
+# =========================
+# Log files
+# =========================
+*.log
+
+# =========================
+# Poetry
+# =========================
+poetry.lock
