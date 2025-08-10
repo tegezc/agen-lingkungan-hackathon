@@ -6,9 +6,19 @@ from datetime import datetime
 from sqlalchemy import create_engine, text
 import os
 from dotenv import load_dotenv
+import firebase_admin
+from firebase_admin import credentials, messaging
 
 # Panggil fungsi ini di paling atas untuk memuat variabel dari file .env
 load_dotenv()
+
+# --- Inisialisasi Firebase Admin SDK ---
+try:
+    # Path ke file kunci rahasia Anda
+    firebase_admin.initialize_app()
+    print("Firebase Admin SDK berhasil diinisialisasi.")
+except Exception as e:
+    print(f"Error inisialisasi Firebase: {e}")
 
 # --- Konfigurasi Koneksi Database (Sekarang Aman) ---
 # Ambil variabel dari environment, bukan hardcode
@@ -44,6 +54,10 @@ class ReadingHistoryItem(BaseModel):
     reading_value: float
     timestamp: datetime
 
+# Model untuk menerima FCM Token dari request
+class NotificationTestPayload(BaseModel):
+    token: str
+
 # --- Aplikasi FastAPI ---
 app = FastAPI(title="Agen Lingkungan API")
 
@@ -60,6 +74,25 @@ app.add_middleware(
 @app.get("/")
 def read_root():
     return {"status": "API Agen Lingkungan berjalan."}
+
+@app.post("/test-notification")
+def test_notification(payload: NotificationTestPayload):
+    """Mengirim notifikasi tes ke token FCM tertentu."""
+    message = messaging.Message(
+        notification=messaging.Notification(
+            title="🚨 Tes Peringatan Agen Lingkungan 🚨",
+            body="Jika Anda menerima ini, koneksi Firebase berhasil!",
+        ),
+        token=payload.token,
+    )
+
+    try:
+        response = messaging.send(message)
+        print('Notifikasi berhasil dikirim:', response)
+        return {"status": "sukses", "message_id": response}
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/ingest")
 def ingest_data(payload: SensorReadingPayload):
