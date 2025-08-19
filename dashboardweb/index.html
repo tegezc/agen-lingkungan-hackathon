@@ -1,27 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dasbor Agen Lingkungan</title>
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        h1 { color: #444; }
+        body {
+            font-family: sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #444;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 </head>
+
 <body>
     <div class="container">
         <h1>Live Monitoring: Ketinggian Air Katulampa</h1>
         <p>Sensor ID: <b id="sensor-id">clw-ktl-01</b></p>
         <canvas id="sensorChart"></canvas>
     </div>
+    <h2>Log Peringatan Otomatis dari AI</h2>
+    <table id="alertsTable">
+        <thead>
+            <tr>
+                <th>Waktu Peringatan</th>
+                <th>Alasan dari AI</th>
+                <th>Level</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
 
     <script>
         const SENSOR_ID = 'clw-ktl-01';
-        const API_URL = `http://127.0.0.1:8000/sensors/${SENSOR_ID}/history`;
+        // URL untuk grafik (sudah benar)
+        const API_URL_HISTORY = `http://127.0.0.1:8000/sensors/${SENSOR_ID}/history`;
+
+        // URL untuk tabel alert (pastikan ini benar)
+        const API_URL_ALERTS = `http://127.0.0.1:8000/alerts/alerts`;
 
         const ctx = document.getElementById('sensorChart').getContext('2d');
         const sensorChart = new Chart(ctx, {
@@ -57,7 +92,7 @@
         // Fungsi untuk mengambil data dan update grafik
         async function updateChart() {
             try {
-                const response = await fetch(API_URL);
+                const response = await fetch(API_URL_HISTORY);
                 if (!response.ok) {
                     console.error('Gagal mengambil data dari API');
                     return;
@@ -72,7 +107,7 @@
                 sensorChart.data.labels = labels;
                 sensorChart.data.datasets[0].data = values;
                 sensorChart.update(); // Perbarui tampilan grafik
-                
+
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -80,9 +115,37 @@
 
         // Panggil fungsi pertama kali
         updateChart();
-        
+
         // Atur agar grafik di-update setiap 5 detik (sama seperti interval simulator)
         setInterval(updateChart, 5000);
+
+        async function updateAlertsTable() {
+            try {
+                // Ganti URL ini jika endpoint Anda berbeda
+                const response = await fetch(API_URL_ALERTS);
+                const alerts = await response.json();
+
+                const tableBody = document.querySelector("#alertsTable tbody");
+                tableBody.innerHTML = ''; // Kosongkan tabel sebelum diisi ulang
+
+                alerts.forEach(alert => {
+                    const row = `<tr>
+                <td>${new Date(alert.timestamp).toLocaleString('id-ID')}</td>
+                <td>${alert.reasoning}</td>
+                <td>${alert.level}</td>
+            </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            } catch (error) {
+                console.error('Gagal memuat data peringatan:', error);
+            }
+        }
+
+        // Panggil fungsi ini saat halaman dimuat dan setiap beberapa detik
+        updateAlertsTable();
+        setInterval(updateAlertsTable, 10000); // Update tabel setiap 10 detik
     </script>
+
 </body>
+
 </html>

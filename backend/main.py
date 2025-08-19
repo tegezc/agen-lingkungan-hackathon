@@ -2,8 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from core import config
-# Di sini nanti kita akan mengimpor semua endpoint API kita
-# from backend.api import ingest, history, notifications # Contoh
+
 
 app = FastAPI(title="Agen Lingkungan API - Refactored")
 
@@ -26,5 +25,7 @@ def read_root():
 # app.include_router(notifications.router)
 
 # Untuk saat ini, kita bisa pindahkan endpoint lama ke sini agar tetap berfungsi
-from api_endpoints import router as api_router # Kita akan buat file ini
-app.include_router(api_router)
+from api import devices, sensors, alerts
+app.include_router(devices.router, prefix="/devices", tags=["Devices"])
+app.include_router(sensors.router, prefix="/sensors", tags=["Sensors"])
+app.include_router(alerts.router, prefix="/alerts", tags=["Alerts"])

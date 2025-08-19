@@ -34,8 +34,8 @@ def run_simulator():
         except requests.exceptions.RequestException as e:
             print(f"Error: Tidak bisa terhubung ke backend. ({e})")
 
-        # Tunggu 5 detik sebelum mengirim data berikutnya
-        time.sleep(5)
+        # Tunggu 10 detik sebelum mengirim data berikutnya
+        time.sleep(10)
 
 if __name__ == "__main__":
     run_simulator()
