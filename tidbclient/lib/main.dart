@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tidbclient/presentation/bloc/alert_bloc.dart';
+import 'package:tidbclient/presentation/screens/alert_history_screen.dart';
 
 // Anda perlu menambahkan file firebase_options.dart setelah konfigurasi
 // (FlutterFire CLI akan membuatnya untuk Anda, atau Anda bisa melakukannya manual)
+import 'domain/repositories/alert_repository.dart';
 import 'firebase_options.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,48 +20,26 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-
-  @override
-  void initState() {
-    super.initState();
-    setupFcm();
-  }
-
-  void setupFcm() async {
-    // Meminta izin notifikasi dari pengguna
-    await FirebaseMessaging.instance.requestPermission();
-
-    // Mengambil token unik untuk perangkat ini
-    final fcmToken = await FirebaseMessaging.instance.getToken();
-
-    // Print token ini ke konsol. KITA SANGAT MEMBUTUHKAN TOKEN INI UNTUK TESTING!
-    print("====================================");
-    print("FCM Token: $fcmToken");
-    print("====================================");
-
-    // Mendengarkan notifikasi yang masuk saat aplikasi terbuka
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Pesan diterima selagi aplikasi terbuka!');
-      if (message.notification != null) {
-        print('Pesan berisi notifikasi: ${message.notification}');
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Agen Lingkungan')),
-        body: const Center(child: Text('Aplikasi siap menerima notifikasi.')),
+    // Menyediakan instance Repository dan BLoC ke seluruh widget tree
+    return RepositoryProvider(
+      create: (context) => AlertRepository(),
+      child: BlocProvider(
+        create: (context) => AlertBloc(
+          alertRepository: RepositoryProvider.of<AlertRepository>(context),
+        )..add(FetchAlerts()), // Langsung panggil event pertama kali
+        child: MaterialApp(
+          title: 'Agen Lingkungan',
+          theme: ThemeData(
+            primarySwatch: Colors.indigo,
+            visualDensity: VisualDensity.adaptivePlatformDensity,
+          ),
+          home: const AlertHistoryScreen(),
+        ),
       ),
     );
   }
