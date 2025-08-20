@@ -25,7 +25,8 @@ def read_root():
 # app.include_router(notifications.router)
 
 # Untuk saat ini, kita bisa pindahkan endpoint lama ke sini agar tetap berfungsi
-from api import devices, sensors, alerts
+from api import devices, sensors, alerts, notifications
 app.include_router(devices.router, prefix="/devices", tags=["Devices"])
 app.include_router(sensors.router, prefix="/sensors", tags=["Sensors"])
 app.include_router(alerts.router, prefix="/alerts", tags=["Alerts"])
+app.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])
