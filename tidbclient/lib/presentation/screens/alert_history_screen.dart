@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../bloc/alert_bloc.dart';
+import '../bloc/alert/alert_bloc.dart';
 
 class AlertHistoryScreen extends StatelessWidget {
   const AlertHistoryScreen({super.key});

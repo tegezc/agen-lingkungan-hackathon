@@ -18,4 +18,23 @@ class ApiService {
       throw Exception('Gagal memuat data alerts');
     }
   }
+
+  Future<void> registerToken(String token) async {
+    final url = Uri.parse('$_baseUrl/devices/register');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'token': token}),
+      );
+      if (response.statusCode != 201) {
+        // Jika gagal, lempar error agar bisa ditangkap oleh Repository/BLoC
+        throw Exception('Gagal registrasi token. Status: ${response.statusCode}');
+      }
+      print('ApiService: Token berhasil dikirim ke server.');
+    } catch (e) {
+      // Lempar kembali error untuk ditangani di lapisan atasnya
+      rethrow;
+    }
+  }
 }

@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:equatable/equatable.dart';
-import '../../data/models/alert.dart';
-import '../../domain/repositories/alert_repository.dart';
+import '../../../data/models/alert.dart';
+import '../../../domain/repositories/alert_repository.dart';
 
 part 'alert_event.dart';
 part 'alert_state.dart';
