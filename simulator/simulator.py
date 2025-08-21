@@ -4,7 +4,7 @@ import json
 import random
 
 # URL tempat backend API kita akan berjalan (untuk testing lokal)
-BACKEND_URL = "http://127.0.0.1:8000/ingest"
+BACKEND_URL = "http://127.0.0.1:8000/sensors/ingest"
 
 # ID sensor hardcoded untuk simulasi
 SENSOR_ID = "clw-ktl-01" 
