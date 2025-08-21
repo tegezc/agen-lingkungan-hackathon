@@ -73,3 +73,6 @@ Thumbs.db
 # Poetry
 # =========================
 poetry.lock
+
+#image upload
+uploads/
