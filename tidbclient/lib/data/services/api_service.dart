@@ -1,5 +1,6 @@
 // mobile-flutter/lib/services/api_service.dart
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/alert.dart';
 
@@ -34,6 +35,36 @@ class ApiService {
       print('ApiService: Token berhasil dikirim ke server.');
     } catch (e) {
       // Lempar kembali error untuk ditangani di lapisan atasnya
+      rethrow;
+    }
+  }
+
+  Future<void> uploadReport(File imageFile, String notes) async {
+    final url = Uri.parse('$_baseUrl/reports/');
+
+    // Membuat request multi-bagian
+    var request = http.MultipartRequest('POST', url);
+
+    // Menambahkan file gambar
+    request.files.add(
+      await http.MultipartFile.fromPath(
+        'image', // 'image' harus cocok dengan nama field di backend
+        imageFile.path,
+      ),
+    );
+
+    // Menambahkan data teks
+    request.fields['notes'] = notes;
+
+    try {
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode != 201) {
+        throw Exception('Gagal mengunggah laporan. Status: ${response.statusCode}');
+      }
+      print('ApiService: Laporan berhasil diunggah.');
+    } catch (e) {
       rethrow;
     }
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tidbclient/presentation/screens/report_screen.dart';
 import '../bloc/alert/alert_bloc.dart';
 
 class AlertHistoryScreen extends StatelessWidget {
@@ -45,6 +46,15 @@ class AlertHistoryScreen extends StatelessWidget {
           }
           return const Center(child: Text('Silakan muat ulang data.'));
         },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const ReportScreen()),
+          );
+        },
+        icon: const Icon(Icons.camera_alt),
+        label: const Text('Lapor Banjir'),
       ),
     );
   }
