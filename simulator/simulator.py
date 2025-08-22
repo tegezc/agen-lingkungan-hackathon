@@ -14,10 +14,15 @@ def run_simulator():
     print(f"Simulator untuk sensor '{SENSOR_ID}' dimulai...")
     print(f"Mengirim data ke: {BACKEND_URL}")
 
+    water_level = 70.0
     while True:
         try:
             # Membuat data ketinggian air palsu yang sedikit bervariasi
-            water_level = round(random.uniform(50.0, 75.0), 2)
+            #water_level = round(random.uniform(50.0, 75.0), 2)
+            water_level += round(random.uniform(1, 2), 2)
+
+            # jangan sampai lewat 80
+            water_level = min(water_level, 80.0)
             
             payload = {
                 "sensor_id": SENSOR_ID,

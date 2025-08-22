@@ -4,28 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dasbor Agen Lingkungan</title>
+    <title>Dasbor Komando Agen AI</title>
     <style>
-        body {
-            font-family: sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            color: #444;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; background-color: #f0f2f5; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1, h2, h3 { color: #1c1e21; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; font-size: 14px; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid #ddd; text-align: left; }
+        thead tr { background-color: #f7f7f7; font-weight: bold; }
+        .feedback-buttons button { margin: 0 5px; padding: 5px 10px; border-radius: 5px; cursor: pointer; border: 1px solid #ccc; font-size: 12px; }
+        .feedback-buttons .valid { background-color: #d4edda; border-color: #c3e6cb;}
+        .feedback-buttons .false-alarm { background-color: #f8d7da; border-color: #f5c6cb;}
+        .manual-alert { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
+        textarea { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; margin-bottom: 10px; }
+        #sendManualAlertBtn { padding: 10px 15px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
@@ -36,6 +28,21 @@
         <h1>Live Monitoring: Ketinggian Air Katulampa</h1>
         <p>Sensor ID: <b id="sensor-id">clw-ktl-01</b></p>
         <canvas id="sensorChart"></canvas>
+        
+        <h2>Log Keputusan & Umpan Balik Agen AI</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Waktu</th>
+                    <th>Alasan dari AI</th>
+                    <th>Kepercayaan AI</th>
+                    <th>Umpan Balik Petugas</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="alertsTableBody"></tbody>
+        </table>
+        
         <div class="manual-alert">
             <h3>Kirim Peringatan Manual</h3>
             <textarea id="manualMessage" placeholder="Ketik pesan peringatan di sini..."></textarea>
@@ -43,18 +50,6 @@
             <p id="sendStatus"></p>
         </div>
     </div>
-    <h2>Log Peringatan Otomatis dari AI</h2>
-    <table id="alertsTable">
-        <thead>
-            <tr>
-                <th>Waktu Peringatan</th>
-                <th>Alasan dari AI</th>
-                <th>Level</th>
-            </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
 
     <script>
         const SENSOR_ID = 'clw-ktl-01';
@@ -62,7 +57,7 @@
         const API_URL_HISTORY = `http://127.0.0.1:8000/sensors/${SENSOR_ID}/history`;
 
         // URL untuk tabel alert (pastikan ini benar)
-        const API_URL_ALERTS = `http://127.0.0.1:8000/alerts/alerts`;
+        const API_URL_ALERTS = `http://127.0.0.1:8000/alerts/`;
 
         const ctx = document.getElementById('sensorChart').getContext('2d');
         const sensorChart = new Chart(ctx, {
@@ -119,37 +114,72 @@
             }
         }
 
-        // Panggil fungsi pertama kali
-        updateChart();
-
-        // Atur agar grafik di-update setiap 5 detik (sama seperti interval simulator)
-        setInterval(updateChart, 5000);
-
         async function updateAlertsTable() {
             try {
-                // Ganti URL ini jika endpoint Anda berbeda
                 const response = await fetch(API_URL_ALERTS);
+                if (!response.ok) return;
                 const alerts = await response.json();
-
-                const tableBody = document.querySelector("#alertsTable tbody");
-                tableBody.innerHTML = ''; // Kosongkan tabel sebelum diisi ulang
+                
+                const tableBody = document.getElementById("alertsTableBody");
+                tableBody.innerHTML = ''; 
 
                 alerts.forEach(alert => {
-                    const row = `<tr>
-                <td>${new Date(alert.timestamp).toLocaleString('id-ID')}</td>
-                <td>${alert.reasoning}</td>
-                <td>${alert.level}</td>
-            </tr>`;
-                    tableBody.innerHTML += row;
+                    const row = document.createElement('tr');
+                    const confidenceText = alert.confidence ? `${(alert.confidence * 100).toFixed(1)}%` : 'N/A';
+                    const feedbackText = alert.feedback ? alert.feedback.replace('_', ' ').toUpperCase() : 'Menunggu...';
+
+                    row.innerHTML = `
+                        <td>${new Date(alert.timestamp).toLocaleString('id-ID')}</td>
+                        <td>${alert.reasoning}</td>
+                        <td>${confidenceText}</td>
+                        <td>${feedbackText}</td>
+                        <td class="feedback-buttons">
+                            <button class="valid" data-id="${alert.id}" data-feedback="valid">Valid 👍</button>
+                            <button class="false-alarm" data-id="${alert.id}" data-feedback="false_alarm">Alarm Palsu 👎</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
                 });
             } catch (error) {
                 console.error('Gagal memuat data peringatan:', error);
             }
         }
 
+        async function submitFeedback(alertId, feedback) {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/alerts/${alertId}/feedback`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ feedback: feedback })
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Gagal submit feedback:', errorData.detail);
+                } else {
+                    updateAlertsTable(); // Refresh tabel setelah submit
+                }
+            } catch (error) {
+                 console.error('Error koneksi saat submit feedback:', error);
+            }
+        }
+
+        document.getElementById('alertsTableBody').addEventListener('click', (event) => {
+            if (event.target.tagName === 'BUTTON' && event.target.dataset.id) {
+                const alertId = event.target.dataset.id;
+                const feedback = event.target.dataset.feedback;
+                submitFeedback(alertId, feedback);
+            }
+        });
+
         // Panggil fungsi ini saat halaman dimuat dan setiap beberapa detik
         updateAlertsTable();
-        setInterval(updateAlertsTable, 10000); // Update tabel setiap 10 detik
+        setInterval(updateAlertsTable, 5000); // Update tabel setiap 10 detik
+
+        // Panggil fungsi pertama kali
+        updateChart();
+
+        // Atur agar grafik di-update setiap 5 detik (sama seperti interval simulator)
+        setInterval(updateChart, 5000);
 
         document.getElementById('sendManualAlertBtn').addEventListener('click', async () => {
             const message = document.getElementById('manualMessage').value;

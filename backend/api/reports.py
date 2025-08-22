@@ -10,13 +10,18 @@ from db.session import engine
 router = APIRouter()
 UPLOADS_DIR = "uploads"
 
+# Pastikan folder uploads ada
+os.makedirs(UPLOADS_DIR, exist_ok=True)
+
 @router.post("/", status_code=201)
 def create_report(
     notes: str = Form(""), 
     image: UploadFile = File(...)
 ):
-    # ... (kode untuk membuat nama file unik tetap sama) ...
     file_extension = os.path.splitext(image.filename)[1]
+    if file_extension.lower() not in ['.png', '.jpg', '.jpeg', '.webp']:
+        raise HTTPException(status_code=400, detail="Format file tidak didukung.")
+    
     unique_filename = f"{uuid.uuid4()}{file_extension}"
     save_path = os.path.join(UPLOADS_DIR, unique_filename)
 

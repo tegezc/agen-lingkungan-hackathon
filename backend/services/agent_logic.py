@@ -36,6 +36,10 @@ def run_agent():
                 # 1. AMBIL DATA UTAMA (SENSOR & CUACA)
                 stmt_sensor_info = text("SELECT latitude, longitude FROM sensors WHERE id = :id")
                 sensor_info = connection.execute(stmt_sensor_info, {"id": config.SENSOR_ID_TEST}).fetchone()
+
+                 # --- QUERY BARU: Ambil Contoh Kasus ---
+                stmt_examples = text("SELECT message, feedback FROM alerts WHERE feedback IS NOT NULL ORDER BY generated_at DESC LIMIT 3")
+                examples = connection.execute(stmt_examples).fetchall()
                 
                 stmt_history = text("""
                     SELECT reading_value, timestamp FROM sensor_readings 
@@ -59,7 +63,7 @@ def run_agent():
                     print(f"Laporan baru ditemukan (ID: {new_report.id}). Menggunakan analisis multi-modal...")
                     # Panggil LLM dengan gambar
                     prediction_result = llm_service.analyze_report_with_vision(
-                        history_data, weather_data, new_report.image_url, new_report.notes
+                        history_data, weather_data, new_report.image_url, new_report.notes, examples=examples
                     )
                     
                     # Update status laporan agar tidak dianalisis lagi
@@ -69,7 +73,7 @@ def run_agent():
                 else:
                     # 3. JIKA TIDAK ADA LAPORAN, GUNAKAN ANALISIS TEKS-SAJA
                     print("Tidak ada laporan baru. Menggunakan analisis prediktif berbasis teks.")
-                    prediction_result = llm_service.get_llm_prediction(history_data, weather_data)
+                    prediction_result = llm_service.get_llm_prediction(history_data, weather_data, examples=examples)
 
             # 4. AMBIL TINDAKAN BERDASARKAN HASIL PREDIKSI
             if prediction_result and prediction_result.get("is_danger_predicted"):
@@ -90,13 +94,19 @@ def run_agent():
                 print("Menyimpan catatan peringatan ke database...")
                 with engine.connect() as connection:
                     alert_level = 3 if confidence > 0.75 else 2
+    
                     alert_stmt = text("""
-                        INSERT INTO alerts (sensor_id, alert_level, message, generated_at)
-                        VALUES (:id, :level, :msg, NOW(3))
+                    INSERT INTO alerts (sensor_id, alert_level, message, generated_at, confidence_score)
+                    VALUES (:id, :level, :msg, NOW(3), :confidence)
                     """)
                     connection.execute(
                         alert_stmt, 
-                        {"id": config.SENSOR_ID_TEST, "level": alert_level, "msg": reason}
+                        {
+                            "id": config.SENSOR_ID_TEST, 
+                            "level": alert_level, 
+                            "msg": reason,
+                            "confidence": confidence # <-- Kirim nilai confidence sebagai parameter
+                        }
                     )
                     connection.commit()
                 print("Catatan peringatan berhasil disimpan.")

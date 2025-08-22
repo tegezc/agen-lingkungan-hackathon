@@ -18,7 +18,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module="vertexai.generat
 # ------------------------------------------------------------
 # Fungsi prediksi teks saja
 # ------------------------------------------------------------
-def get_llm_prediction(history_data, weather_data):
+def get_llm_prediction(history_data, weather_data,examples=[]):
     """
     Meminta prediksi dari Gemini dan mem-parsing output JSON-nya.
     """
@@ -27,13 +27,23 @@ def get_llm_prediction(history_data, weather_data):
     history_str = ", ".join([f"{row.timestamp.strftime('%H:%M')}-{row.reading_value}cm"
                              for row in history_data])
     
+    examples_str = "\n".join([f"- Kasus: {ex.message}, Umpan Balik Manusia: {ex.feedback}" for ex in examples])
     prompt = f"""
     Anda adalah seorang ahli hidrologi. Analisis data berikut:
     1. Data Histori Ketinggian Air: {history_str}
     2. Ramalan Cuaca: {weather_data}
+
+    Data Tambahan - Contoh Kasus Terdahulu & Umpan Balik Manusia:
+    {examples_str if examples else "Tidak ada contoh kasus."}
+
+    Tugas: Berdasarkan SEMUA data di atas, termasuk belajar dari contoh kasus, buat prediksi akhir Anda.
     Pertanyaan: Berdasarkan data ini, apakah ketinggian air diprediksi akan melewati ambang batas berbahaya 85 cm dalam 3 jam ke depan?
     Berikan output HANYA dalam format JSON: {{"is_danger_predicted": boolean, "confidence_score": float, "reasoning": "string", "predicted_peak_level_cm": integer}}
     """
+
+    print("\n--- PROMPT TEKS DIKIRIM  ---")
+    print(prompt)
+    print("---------------------------------")
 
     try:
         response = model.generate_content(prompt)
@@ -47,7 +57,7 @@ def get_llm_prediction(history_data, weather_data):
 # ------------------------------------------------------------
 # Fungsi prediksi multi-modal (teks + gambar)
 # ------------------------------------------------------------
-def analyze_report_with_vision(history_data, weather_data, image_path, notes):
+def analyze_report_with_vision(history_data, weather_data, image_path, notes,examples=[]):
     """
     Meminta prediksi multi-modal dari Gemini (Teks + Gambar)
     """
@@ -67,6 +77,7 @@ def analyze_report_with_vision(history_data, weather_data, image_path, notes):
     history_str = ", ".join([f"{row.timestamp.strftime('%H:%M')}-{row.reading_value}cm"
                              for row in history_data])
     
+    examples_str = "\n".join([f"- Kasus: {ex.message}, Umpan Balik Manusia: {ex.feedback}" for ex in examples])
     prompt = f"""
     Anda adalah seorang ahli hidrologi dan analis risiko dari TiDB. Analisis semua data berikut untuk memprediksi potensi banjir secara akurat.
 
@@ -74,6 +85,12 @@ def analyze_report_with_vision(history_data, weather_data, image_path, notes):
     1.  **Data Histori Sensor Ketinggian Air:** {history_str}
     2.  **Ramalan Cuaca:** {weather_data}
     3.  **Laporan Visual dari Warga (Gambar Terlampir):** Catatan dari warga: "{notes}"
+
+    Data Tambahan - Contoh Kasus Terdahulu & Umpan Balik Manusia:
+    {examples_str if examples else "Tidak ada contoh kasus."}
+
+    Tugas: Berdasarkan SEMUA data di atas, termasuk belajar dari contoh kasus, buat prediksi akhir Anda.
+
 
     Lakukan analisis berikut (chain of thought):
     1.  Analisis gambar terlampir. Apakah gambar tersebut menunjukkan adanya genangan air atau banjir? Seberapa parah kondisinya?
@@ -83,6 +100,11 @@ def analyze_report_with_vision(history_data, weather_data, image_path, notes):
     
     Berikan output HANYA dalam format JSON: {{"is_danger_predicted": boolean, "confidence_score": float, "reasoning": "string", "image_analysis": "string"}}
     """
+
+    # --- TAMBAHKAN PRINT DI SINI ---
+    print("\n--- PROMPT MULTI-MODAL DIKIRIM ---")
+    print(prompt)
+    print("---------------------------------")
 
     try:
         # 3. Kirim prompt teks DAN gambar ke Gemini

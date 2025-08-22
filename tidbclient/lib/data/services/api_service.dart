@@ -9,7 +9,7 @@ class ApiService {
   final String _baseUrl = 'http://10.0.2.2:8000';
 
   Future<List<Alert>> fetchAlerts() async {
-    final response = await http.get(Uri.parse('$_baseUrl/alerts/alerts'));
+    final response = await http.get(Uri.parse('$_baseUrl/alerts/'));
 
     if (response.statusCode == 200) {
       List<dynamic> body = json.decode(response.body);
