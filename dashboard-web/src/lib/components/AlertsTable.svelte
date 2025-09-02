@@ -5,6 +5,7 @@
     let alerts = [];
     let isLoading = true;
     let error = null;
+    let updatingId = null;
 
     async function updateTable() {
         try {
@@ -18,14 +19,17 @@
         }
     }
 
-    async function handleFeedback(alertId, feedback) {
+      async function handleFeedback(alertId, feedback) {
+        updatingId = alertId; // Set ID yang sedang diupdate
         try {
             await submitFeedback(alertId, feedback);
             // Refresh tabel untuk menunjukkan perubahan
-            updateTable(); 
+            await updateTable(); 
         } catch (e) {
             console.error(e);
             alert(`Gagal mengirim umpan balik: ${e.message}`);
+        } finally {
+            updatingId = null; // Selesai, reset ID
         }
     }
 
@@ -54,14 +58,24 @@
         </thead>
         <tbody>
             {#each alerts as alert (alert.id)}
-                <tr>
+                <tr class:warning={alert.level === 2} class:danger={alert.level >= 3}>
                     <td>{new Date(alert.timestamp).toLocaleString('id-ID')}</td>
                     <td>{alert.reasoning}</td>
                     <td>{alert.confidence ? `${(alert.confidence * 100).toFixed(1)}%` : 'N/A'}</td>
                     <td><b>{alert.feedback ? alert.feedback.replace('_', ' ').toUpperCase() : 'Menunggu...'}</b></td>
                     <td class="feedback-buttons">
-                        <button class="valid" on:click={() => handleFeedback(alert.id, 'valid')}>Valid 👍</button>
-                        <button class="false-alarm" on:click={() => handleFeedback(alert.id, 'false_alarm')}>Alarm Palsu 👎</button>
+                        <button 
+                            class="valid" 
+                            disabled={updatingId === alert.id || alert.feedback}
+                            on:click={() => handleFeedback(alert.id, 'valid')}>
+                            {#if updatingId === alert.id}Menyimpan...{:else}Valid 👍{/if}
+                        </button>
+                        <button 
+                            class="false-alarm" 
+                            disabled={updatingId === alert.id || alert.feedback}
+                            on:click={() => handleFeedback(alert.id, 'false_alarm')}>
+                            {#if updatingId === alert.id}Menyimpan...{:else}Alarm Palsu 👎{/if}
+                        </button>
                     </td>
                 </tr>
             {/each}
@@ -70,11 +84,25 @@
 {/if}
 
 <style>
-    /* ... (Salin-tempel semua style untuk tabel dan tombol dari index.html lama Anda ke sini) ... */
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; font-size: 14px; }
+   table { border-collapse: collapse; width: 100%; margin-top: 20px; font-size: 14px; }
     th, td { padding: 12px 15px; border-bottom: 1px solid #ddd; text-align: left; }
     thead tr { background-color: #f7f7f7; font-weight: bold; }
-    .feedback-buttons button { margin: 0 5px; padding: 5px 10px; border-radius: 5px; cursor: pointer; border: 1px solid #ccc; font-size: 12px; }
+    .feedback-buttons button { margin: 0 5px; padding: 5px 10px; border-radius: 5px; cursor: pointer; border: 1px solid #ccc; font-size: 12px; transition: background-color 0.2s; }
     .feedback-buttons .valid { background-color: #d4edda; border-color: #c3e6cb;}
     .feedback-buttons .false-alarm { background-color: #f8d7da; border-color: #f5c6cb;}
+    button:disabled { cursor: not-allowed; opacity: 0.6; }
+
+    /* --- CSS BARU UNTUK SOROTAN WARNA BARIS --- */
+    tr.warning {
+        background-color: #fff3cd; /* Kuning Waspada */
+    }
+    tr.danger {
+        background-color: #f8d7da; /* Merah Bahaya */
+    }
+    :global(tr.warning) {
+        background-color: #fff3cd !important; /* Kuning Waspada */
+    }
+    :global(tr.danger) {
+        background-color: #f8d7da !important; /* Merah Bahaya */
+    }
 </style>

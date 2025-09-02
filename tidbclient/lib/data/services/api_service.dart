@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/alert.dart';
+import '../models/status.dart';
 
 class ApiService {
   // Gunakan IP 10.0.2.2 untuk emulator Android mengakses localhost PC
@@ -66,6 +67,15 @@ class ApiService {
       print('ApiService: Laporan berhasil diunggah.');
     } catch (e) {
       rethrow;
+    }
+  }
+
+  Future<Status> fetchLatestStatus() async {
+    final response = await http.get(Uri.parse('$_baseUrl/status/latest'));
+    if (response.statusCode == 200) {
+      return Status.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Gagal memuat status terbaru');
     }
   }
 }

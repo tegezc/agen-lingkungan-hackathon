@@ -63,3 +63,15 @@ export async function sendManualAlert(message) {
     }
     return await response.json();
 }
+
+/**
+ * Mengambil status terbaru dari backend.
+ * @returns {Promise<any>}
+ */
+export async function getLatestStatus() {
+    const response = await fetch(`${BASE_URL}/status/latest`);
+    if (!response.ok) {
+        throw new Error('Gagal mengambil status terbaru');
+    }
+    return await response.json();
+}

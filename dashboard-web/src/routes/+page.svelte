@@ -2,12 +2,13 @@
     import SensorChart from '$lib/components/SensorChart.svelte';
     import AlertsTable from '$lib/components/AlertsTable.svelte';
     import ManualAlertPanel from '$lib/components/ManualAlertPanel.svelte';
+    import SystemStatusCard from '$lib/components/SystemStatusCard.svelte';
 </script>
 
 <div class="container">
-    <h1>Live Monitoring: Ketinggian Air Katulampa</h1>
+     <h1>Dasbor Pemantauan & Komando Lingkungan</h1>
     <p>Sensor ID: <b>clw-ktl-01</b></p>
-    
+    <SystemStatusCard /> <hr class="divider" />
     <div class="chart-container">
         <SensorChart sensorId={'clw-ktl-01'} />
     </div>
@@ -23,21 +24,30 @@
 
 <style>
     .container {
-        max-width: 900px;
+        max-width: 1100px;
         margin: 2rem auto;
-        padding: 2rem;
+        padding: 2.5rem;
         background: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        font-family: sans-serif;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
     .chart-container {
         margin-top: 2rem;
+        margin-bottom: 2.5rem;
     }
-    .divider {
+    .divider { 
         margin-top: 2.5rem;
         margin-bottom: 2.5rem;
         border: 0;
-        border-top: 1px solid #eee;
+         border-top: 1px solid #e2e8f0;
+    }
+    h1 {
+        color: #1a202c;
+        font-size: 2.5em;
+        margin-bottom: 0.5em;
+    }
+    p {
+        color: #4a5568;
     }
 </style>

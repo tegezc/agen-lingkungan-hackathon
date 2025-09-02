@@ -3,12 +3,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tidbclient/presentation/bloc/alert/alert_bloc.dart';
 import 'package:tidbclient/presentation/bloc/notification/notification_bloc.dart';
-import 'package:tidbclient/presentation/screens/alert_history_screen.dart';
+import 'package:tidbclient/presentation/bloc/status/status_bloc.dart';
+import 'package:tidbclient/presentation/screens/home_screen.dart';
 
 // Anda perlu menambahkan file firebase_options.dart setelah konfigurasi
 // (FlutterFire CLI akan membuatnya untuk Anda, atau Anda bisa melakukannya manual)
 import 'domain/repositories/alert_repository.dart';
 import 'domain/repositories/notification_repository.dart';
+import 'domain/repositories/status_repository.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -29,6 +31,7 @@ class MyApp extends StatelessWidget {
       providers: [
         RepositoryProvider(create: (context) => AlertRepository()),
         RepositoryProvider(create: (context) => NotificationRepository()),
+        RepositoryProvider(create: (context) => StatusRepository()),
       ],
       // Kemudian menyediakan SEMUA BLoC
       child: MultiBlocProvider(
@@ -45,6 +48,11 @@ class MyApp extends StatelessWidget {
               notificationRepository: context.read<NotificationRepository>(),
             )..add(RegisterDevice()), // Memicu registrasi perangkat
           ),
+          BlocProvider(
+            create: (context) => StatusBloc(
+              statusRepository: context.read<StatusRepository>(),
+            )..add(FetchStatus()),
+          ),
         ],
         child: MaterialApp(
           title: 'Agen Lingkungan',
@@ -52,7 +60,7 @@ class MyApp extends StatelessWidget {
             primarySwatch: Colors.indigo,
             visualDensity: VisualDensity.adaptivePlatformDensity,
           ),
-          home: const AlertHistoryScreen(),
+          home: const HomeScreen(),
         ),
       ),
     );
