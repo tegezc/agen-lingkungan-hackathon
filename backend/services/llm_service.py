@@ -22,36 +22,37 @@ def get_llm_prediction(history_data, weather_data,examples=[]):
     """
     Meminta prediksi dari Gemini dan mem-parsing output JSON-nya.
     """
-    print("Meminta prediksi dari Gemini (teks)...")
+    print("Requesting prediction from Gemini (text)...")
 
     history_str = ", ".join([f"{row.timestamp.strftime('%H:%M')}-{row.reading_value}cm"
                              for row in history_data])
     
     examples_str = "\n".join([f"- Kasus: {ex.message}, Umpan Balik Manusia: {ex.feedback}" for ex in examples])
     prompt = f"""
-    Anda adalah seorang ahli hidrologi. Analisis data berikut:
-    1. Data Histori Ketinggian Air: {history_str}
-    2. Ramalan Cuaca: {weather_data}
+    You are a senior hydrologist and risk analyst. Your task is to predict flood potential based on sensor and weather data.
 
-    Data Tambahan - Contoh Kasus Terdahulu & Umpan Balik Manusia:
-    {examples_str if examples else "Tidak ada contoh kasus."}
+    Available data:
+    - Historical Water Level Data (Time-Value): {history_str}
+    - Weather Forecast: {weather_data}
+    - Previous Case Examples with Human Feedback: {examples_str if examples else "No prior examples."}
 
-    Tugas: Berdasarkan SEMUA data di atas, termasuk belajar dari contoh kasus, buat prediksi akhir Anda.
-    Pertanyaan: Berdasarkan data ini, apakah ketinggian air diprediksi akan melewati ambang batas berbahaya 85 cm dalam 3 jam ke depan?
-    Berikan output HANYA dalam format JSON: {{"is_danger_predicted": boolean, "confidence_score": float, "reasoning": "string", "predicted_peak_level_cm": integer}}
+    Task: Based on all available text data and learning from past feedback, predict if the water level will cross the dangerous threshold of 85 cm in the next 3 hours.
+    
+    Provide the output ONLY in the following JSON format:
+    {{"is_danger_predicted": boolean, "confidence_score": float, "reasoning": "string"}}
     """
 
-    print("\n--- PROMPT TEKS DIKIRIM  ---")
+    print("\n--- TEXT PROMPT SENT  ---")
     print(prompt)
     print("---------------------------------")
 
     try:
         response = model.generate_content(prompt)
         clean_response = response.text.replace("```json", "").replace("```", "").strip()
-        print(f"Respons dari LLM (teks): {clean_response}")
+        print(f"Response from LLM (text): {clean_response}")
         return json.loads(clean_response)
     except Exception as e:
-        print(f"Gagal memanggil Vertex AI (teks): {e}")
+        print(f"Failed to call Vertex AI (text): {e}")
         return None
 
 # ------------------------------------------------------------
@@ -61,7 +62,7 @@ def analyze_report_with_vision(history_data, weather_data, image_path, notes,exa
     """
     Meminta prediksi multi-modal dari Gemini (Teks + Gambar)
     """
-    print("Meminta prediksi multi-modal dari Gemini (Teks + Gambar)...")
+    print("Requesting multi-modal prediction from Gemini (Text + Image)...")
 
     # 1. Baca data gambar dari file
     try:
@@ -70,39 +71,34 @@ def analyze_report_with_vision(history_data, weather_data, image_path, notes,exa
         from vertexai.generative_models import Part
         image_part = Part.from_data(data=image_bytes, mime_type="image/jpeg")
     except Exception as e:
-        print(f"Gagal membaca file gambar: {e}")
+        print(f"Failed to read image file: {e}")
         return None
 
     # 2. Siapkan prompt teks
     history_str = ", ".join([f"{row.timestamp.strftime('%H:%M')}-{row.reading_value}cm"
                              for row in history_data])
     
-    examples_str = "\n".join([f"- Kasus: {ex.message}, Umpan Balik Manusia: {ex.feedback}" for ex in examples])
+    examples_str = "\n".join([f"- Case: {ex.message}, Human Feedback: {ex.feedback}" for ex in examples])
     prompt = f"""
-    Anda adalah seorang ahli hidrologi dan analis risiko dari TiDB. Analisis semua data berikut untuk memprediksi potensi banjir secara akurat.
+    You are a senior hydrologist and risk analyst from TiDB. Your task is to predict flood potential.
 
-    Data yang tersedia:
-    1.  **Data Histori Sensor Ketinggian Air:** {history_str}
-    2.  **Ramalan Cuaca:** {weather_data}
-    3.  **Laporan Visual dari Warga (Gambar Terlampir):** Catatan dari warga: "{notes}"
+    Available data:
+    - Historical Data (Time-Value): {history_str}
+    - Weather Forecast: {weather_data}
+    - (Optional) Citizen Visual Report: Note from citizen: "{notes}"
+    - (Optional) Previous Case Examples with Human Feedback: {examples_str if examples else "No prior examples."}
 
-    Data Tambahan - Contoh Kasus Terdahulu & Umpan Balik Manusia:
-    {examples_str if examples else "Tidak ada contoh kasus."}
+    Perform the following analysis (chain of thought):
+    1. Analyze the trend from the historical sensor data.
+    2. Correlate this trend with the weather forecast and any visual reports.
+    3. Based on all available data and learning from past feedback, predict if the water level will cross the dangerous threshold of 85 cm.
+    4. Provide a confidence score from 0.0 to 1.0.
 
-    Tugas: Berdasarkan SEMUA data di atas, termasuk belajar dari contoh kasus, buat prediksi akhir Anda.
-
-
-    Lakukan analisis berikut (chain of thought):
-    1.  Analisis gambar terlampir. Apakah gambar tersebut menunjukkan adanya genangan air atau banjir? Seberapa parah kondisinya?
-    2.  Analisis tren dari data histori sensor.
-    3.  Korelasikan analisis visual, tren sensor, dan ramalan cuaca.
-    4.  Buat prediksi akhir: apakah ketinggian air akan melewati ambang batas berbahaya 85 cm dalam 3 jam ke depan?
-    
-    Berikan output HANYA dalam format JSON: {{"is_danger_predicted": boolean, "confidence_score": float, "reasoning": "string", "image_analysis": "string"}}
+    Provide the output ONLY in the following JSON format:
+    {{"is_danger_predicted": boolean, "confidence_score": float, "reasoning": "string", "image_analysis": "string (if applicable)"}}
     """
 
-    # --- TAMBAHKAN PRINT DI SINI ---
-    print("\n--- PROMPT MULTI-MODAL DIKIRIM ---")
+    print("\n--- MULTI-MODAL PROMPT SENT ---")
     print(prompt)
     print("---------------------------------")
 
@@ -110,8 +106,8 @@ def analyze_report_with_vision(history_data, weather_data, image_path, notes,exa
         # 3. Kirim prompt teks DAN gambar ke Gemini
         response = model.generate_content([image_part, prompt])
         clean_response = response.text.replace("```json", "").replace("```", "").strip()
-        print(f"Respons Multi-modal dari LLM: {clean_response}")
+        print(f"Multi-modal Response from LLM: {clean_response}")
         return json.loads(clean_response)
     except Exception as e:
-        print(f"Gagal memanggil Vertex AI (multi-modal): {e}")
+        print(f"Failed to call Vertex AI (multi-modal): {e}")
         return None

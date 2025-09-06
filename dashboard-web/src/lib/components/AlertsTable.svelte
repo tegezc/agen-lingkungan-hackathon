@@ -39,21 +39,21 @@
     });
 </script>
 
-<h2>Log Keputusan & Umpan Balik Agen AI</h2>
+<h2>AI Agent Decision & Feedback Log</h2>
 
 {#if isLoading}
-    <p>Memuat data peringatan...</p>
+    <p>Loading alert data...</p>
 {:else if error}
     <p style="color: red;">{error}</p>
 {:else}
     <table>
         <thead>
             <tr>
-                <th>Waktu</th>
-                <th>Alasan dari AI</th>
-                <th>Kepercayaan AI</th>
-                <th>Umpan Balik Petugas</th>
-                <th>Aksi</th>
+                <th>Time</th>
+                <th>AI Reasoning</th>
+                <th>AI Confidence</th>
+                <th>Operator Feedback</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -62,19 +62,19 @@
                     <td>{new Date(alert.timestamp).toLocaleString('id-ID')}</td>
                     <td>{alert.reasoning}</td>
                     <td>{alert.confidence ? `${(alert.confidence * 100).toFixed(1)}%` : 'N/A'}</td>
-                    <td><b>{alert.feedback ? alert.feedback.replace('_', ' ').toUpperCase() : 'Menunggu...'}</b></td>
+                    <td><b>{alert.feedback ? alert.feedback.replace('_', ' ').toUpperCase() : 'Pending...'}</b></td>
                     <td class="feedback-buttons">
                         <button 
                             class="valid" 
                             disabled={updatingId === alert.id || alert.feedback}
                             on:click={() => handleFeedback(alert.id, 'valid')}>
-                            {#if updatingId === alert.id}Menyimpan...{:else}Valid 👍{/if}
+                            {#if updatingId === alert.id}Saving...{:else}Valid 👍{/if}
                         </button>
                         <button 
                             class="false-alarm" 
                             disabled={updatingId === alert.id || alert.feedback}
                             on:click={() => handleFeedback(alert.id, 'false_alarm')}>
-                            {#if updatingId === alert.id}Menyimpan...{:else}Alarm Palsu 👎{/if}
+                            {#if updatingId === alert.id}Saving...{:else}False Alarm 👎{/if}
                         </button>
                     </td>
                 </tr>

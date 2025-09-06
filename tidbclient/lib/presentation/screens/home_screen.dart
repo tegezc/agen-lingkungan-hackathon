@@ -14,7 +14,7 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Status Lingkungan'),
+        title: const Text('Environment Status'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -22,8 +22,8 @@ class HomeScreen extends StatelessWidget {
           children: [
             BlocBuilder<StatusBloc, StatusState>(
               builder: (context, state) {
-                String statusText = "Memuat Status...";
-                String messageText = "Menghubungi server...";
+                String statusText = "Loading Status...";
+                String messageText = "Contacting server...";
 
                 if (state is StatusLoaded) {
                   statusText = state.status.status.toUpperCase();
@@ -74,7 +74,7 @@ class HomeScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.history),
-                label: const Text('Lihat Riwayat Peringatan'),
+                label: const Text('View Alert History'),
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(builder: (context) => const AlertHistoryScreen()),

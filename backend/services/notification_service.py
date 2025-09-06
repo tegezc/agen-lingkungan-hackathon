@@ -4,15 +4,15 @@ from firebase_admin import credentials, messaging
 if not firebase_admin._apps:
     cred = credentials.ApplicationDefault()
     firebase_admin.initialize_app(cred)
-    print("Firebase Admin SDK berhasil diinisialisasi untuk notifikasi.")
+    print("Firebase Admin SDK initialized successfully for notifications.")
 
 def send_multicast_notification(tokens: list, title: str, body: str):
     """
-    Mengirim notifikasi ke banyak perangkat dengan cara iterasi (satu per satu).
-    Lebih andal daripada send_multicast jika API legacy bermasalah.
+    Sends notifications to multiple devices by iterating (one by one).
+    More reliable than send_multicast if the legacy API has issues.
     """
     if not tokens:
-        print("Tidak ada token, tidak ada notifikasi yang dikirim.")
+        print("No tokens provided, no notification sent.")
         return None
 
     success_count = 0
@@ -29,13 +29,13 @@ def send_multicast_notification(tokens: list, title: str, body: str):
             messaging.send(message)
             success_count += 1
         except Exception as e:
-            print(f"Gagal mengirim notifikasi ke token {token}: {e}")
+            print(f"Failed to send notification to token {token}: {e}")
             failure_count += 1
             failed_tokens.append(token)
 
-    print(f"Notifikasi berhasil dikirim ke {success_count} dari {len(tokens)} perangkat.")
+    print(f"Successfully sent notifications to {success_count} of {len(tokens)} devices.")
     if failure_count > 0:
-        print(f"Token yang gagal: {failed_tokens}")
+        print(f"Failed tokens: {failed_tokens}")
 
     # Kita buat objek respons tiruan agar formatnya mirip
     class MockResponse:

@@ -7,16 +7,16 @@
 
     async function handleSubmit() {
         if (!message) {
-            statusMessage = 'Pesan tidak boleh kosong!';
+            statusMessage = 'Message cannot be empty!';
             return;
         }
 
         isLoading = true;
-        statusMessage = 'Mengirim...';
+        statusMessage = 'Sending...';
 
         try {
             const result = await sendManualAlert(message);
-            statusMessage = `Pesan berhasil dikirim ke ${result.sent_to} perangkat.`;
+            statusMessage = `Message sent successfully to ${result.sent_to} devices.`;
             message = ''; // Kosongkan textarea setelah berhasil
         } catch (e) {
             statusMessage = `Error: ${e.message}`;
@@ -27,13 +27,13 @@
 </script>
 
 <div class="manual-alert">
-    <h3>Kirim Peringatan Manual</h3>
-    <textarea bind:value={message} placeholder="Ketik pesan peringatan di sini..." disabled={isLoading}></textarea>
+    <h3>Send Manual Alert</h3>
+    <textarea bind:value={message} placeholder="Type the alert message here..." disabled={isLoading}></textarea>
     <button on:click={handleSubmit} disabled={isLoading}>
         {#if isLoading}
-            Mengirim...
+            Sending...
         {:else}
-            Kirim ke Semua Pengguna
+            Send to All Users
         {/if}
     </button>
     {#if statusMessage}

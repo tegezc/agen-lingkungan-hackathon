@@ -6,7 +6,7 @@
 </script>
 
 <div class="container">
-     <h1>Dasbor Pemantauan & Komando Lingkungan</h1>
+     <h1>Environmental Monitoring & Command Dashboard</h1>
     <p>Sensor ID: <b>clw-ktl-01</b></p>
     <SystemStatusCard /> <hr class="divider" />
     <div class="chart-container">

@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from core import config
 
 
-app = FastAPI(title="Agen Lingkungan API - Refactored")
+app = FastAPI(title="environment Agent API - Refactored")
 
 # Menambahkan Middleware CORS
 app.add_middleware(
@@ -17,7 +17,7 @@ app.add_middleware(
 
 @app.get("/")
 def read_root():
-    return {"status": f"API Agen Lingkungan v2 berjalan."}
+    return {"status": f"Environment Agent API v2 is running."}
 
 # Di sini kita akan "include" router dari folder api/
 # app.include_router(ingest.router)

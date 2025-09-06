@@ -31,7 +31,7 @@ class _ReportScreenState extends State<ReportScreen> {
   Future<void> _submitReport() async {
     if (_imageFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Silakan pilih gambar terlebih dahulu.')),
+        const SnackBar(content: Text('Please select an image first.')),
       );
       return;
     }
@@ -41,12 +41,12 @@ class _ReportScreenState extends State<ReportScreen> {
     try {
       await _apiService.uploadReport(_imageFile!, _notesController.text);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Laporan berhasil terkirim. Terima kasih!')),
+        const SnackBar(content: Text('Report sent successfully. Thank you!')),
       );
       Navigator.of(context).pop();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal mengirim laporan: $e')),
+        SnackBar(content: Text('Failed to send report: $e')),
       );
     } finally {
       setState(() { _isLoading = false; });
@@ -56,7 +56,7 @@ class _ReportScreenState extends State<ReportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Lapor Kondisi Banjir')),
+      appBar: AppBar(title: const Text('Report Flood Condition')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -72,14 +72,14 @@ class _ReportScreenState extends State<ReportScreen> {
                 ),
                 child: _imageFile != null
                     ? Image.file(_imageFile!, fit: BoxFit.cover)
-                    : const Center(child: Text('Ketuk untuk memilih gambar')),
+                    : const Center(child: Text('Tap to select an image')),
               ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _notesController,
               decoration: const InputDecoration(
-                labelText: 'Catatan (opsional)',
+                labelText: 'Notes (optional)',
                 border: OutlineInputBorder(),
               ),
               maxLines: 3,
@@ -90,7 +90,7 @@ class _ReportScreenState extends State<ReportScreen> {
               style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
               child: _isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('KIRIM LAPORAN'),
+                  : const Text('SUBMIT REPORT'),
             ),
           ],
         ),

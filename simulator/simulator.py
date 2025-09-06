@@ -9,8 +9,8 @@ BACKEND_URL = "http://127.0.0.1:8000/sensors/ingest"
 SENSOR_ID = "clw-ktl-01"
 
 def run_simulation(scenario):
-    """Menjalankan simulasi berdasarkan skenario yang dipilih."""
-    print(f"Simulator dimulai dengan skenario: '{scenario}'")
+    """Runs the simulation based on the selected scenario."""
+    print(f"Simulator starting with scenario: '{scenario}'")
     water_level = 60.0
 
     while True:
@@ -33,20 +33,20 @@ def run_simulation(scenario):
         }
         try:
             response = requests.post(BACKEND_URL, json=payload)
-            print(f"Data terkirim: {payload}, Status: {response.status_code}")
+            print(f"Data sent: {payload}, Status: {response.status_code}")
         except requests.exceptions.RequestException:
-            print(f"Error: Gagal terhubung ke backend. Mencoba lagi...")
+            print(f"Error: Failed to connect to the backend. Retrying...")
         
         time.sleep(5) # Kita percepat interval untuk demo
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Menjalankan simulator sensor untuk FloodCast.")
+    parser = argparse.ArgumentParser(description="Runs the sensor simulator for FloodCast.")
     parser.add_argument(
         '--scenario', 
         type=str, 
         default='normal', 
         choices=['normal', 'rising', 'ambiguous'],
-        help="Pilih skenario data yang akan dikirim."
+        help="Choose the data scenario to be sent."
     )
     args = parser.parse_args()
     run_simulation(args.scenario)

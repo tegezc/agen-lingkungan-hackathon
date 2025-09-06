@@ -7,28 +7,28 @@ from core import config
 from services import llm_service, notification_service
 
 def get_weather_forecast(lat, lon, api_key):
-    """Mengambil ramalan cuaca dari OpenWeatherMap."""
+    """Fetches the weather forecast from OpenWeatherMap."""
     url = f"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={api_key}&units=metric"
     try:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         data = response.json()
         forecast = data['list'][0]['weather'][0]['description']
-        return f"Ramalan cuaca 3 jam ke depan: {forecast}."
+        return f"3-hour weather forecast: {forecast}."
     except Exception as e:
-        print(f"Gagal mengambil data cuaca: {e}. Menggunakan data tiruan.")
-        return "Informasi cuaca tidak tersedia. Data tiruan: heavy rain."
+        print(f"Failed to fetch weather data: {e}. Using mock data.")
+        return "Weather information unavailable. Mock data: heavy rain."
 
 def run_agent():
-    """Fungsi utama agen prediktif dan multi-modal yang berjalan terus menerus."""
-    print("Agen AI Multi-modal (Final) dimulai...")
+    """The main function for the predictive and multi-modal agent that runs continuously."""
+    print("Multi-modal AI Agent (Final) starting...")
     if not engine:
-        print("Agen dihentikan: Koneksi DB tidak tersedia.")
+        print("Agent stopped: DB connection not available.")
         return
 
     while True:
         try:
-            print(f"\n--- Siklus Agen Dimulai (Interval: {config.AGENT_CYCLE_SECONDS} detik) ---")
+            print(f"\n--- Agent Cycle Started (Interval: {config.AGENT_CYCLE_SECONDS} seconds) ---")
             
             prediction_result = None
             
@@ -49,7 +49,7 @@ def run_agent():
                 history_data = connection.execute(stmt_history, {"id": config.SENSOR_ID_TEST}).fetchall()
 
                 if not sensor_info or len(history_data) < 5:
-                    print("Data histori tidak cukup. Melewati siklus.")
+                    print("Insufficient history data. Skipping cycle.")
                     time.sleep(config.AGENT_CYCLE_SECONDS)
                     continue
 
@@ -60,7 +60,7 @@ def run_agent():
                 new_report = connection.execute(stmt_reports).fetchone()
 
                 if new_report:
-                    print(f"Laporan baru ditemukan (ID: {new_report.id}). Menggunakan analisis multi-modal...")
+                    print(f"New report found (ID: {new_report.id}). Using multi-modal analysis...")
                     # Panggil LLM dengan gambar
                     prediction_result = llm_service.analyze_report_with_vision(
                         history_data, weather_data, new_report.image_url, new_report.notes, examples=examples
@@ -72,13 +72,13 @@ def run_agent():
                     connection.commit()
                 else:
                     # 3. JIKA TIDAK ADA LAPORAN, GUNAKAN ANALISIS TEKS-SAJA
-                    print("Tidak ada laporan baru. Menggunakan analisis prediktif berbasis teks.")
+                    print("No new reports. Using text-based predictive analysis.")
                     prediction_result = llm_service.get_llm_prediction(history_data, weather_data, examples=examples)
 
             # 4. AMBIL TINDAKAN BERDASARKAN HASIL PREDIKSI
             if prediction_result and prediction_result.get("is_danger_predicted"):
-                print("!!! PREDIKSI BAHAYA DITERIMA !!!")
-                reason = prediction_result.get('reasoning', 'AI memprediksi potensi bahaya.')
+                print("!!! DANGER PREDICTION RECEIVED !!!")
+                reason = prediction_result.get('reasoning', 'AI predicts potential danger.')
                 confidence = prediction_result.get('confidence_score', 0.0)
                 
                 with engine.connect() as connection:
@@ -87,11 +87,11 @@ def run_agent():
 
                 notification_service.send_multicast_notification(
                     tokens=tokens,
-                    title="🚨 PREDIKSI PERINGATAN DINI 🚨",
+                    title="🚨 PREDICTIVE EARLY WARNING 🚨",
                     body=reason
                 )
 
-                print("Menyimpan catatan peringatan ke database...")
+                print("Alert record saved successfully.")
                 with engine.connect() as connection:
                     alert_level = 3 if confidence > 0.75 else 2
     
@@ -109,16 +109,16 @@ def run_agent():
                         }
                     )
                     connection.commit()
-                print("Catatan peringatan berhasil disimpan.")
+                print("Condition predicted to be safe.")
                 
                 # Setelah mengirim notifikasi penting, tunggu lebih lama.
                 time.sleep(180) 
             else:
-                print("Kondisi diprediksi aman.")
+                print("Condition predicted to be safe.")
                 time.sleep(config.AGENT_CYCLE_SECONDS)
 
         except Exception as e:
-            print("!!! TERJADI ERROR PADA SIKLUS AGEN !!!")
+            print("!!! AN ERROR OCCURRED IN THE AGENT CYCLE !!!")
             traceback.print_exc()
             time.sleep(config.AGENT_CYCLE_SECONDS * 2)
 

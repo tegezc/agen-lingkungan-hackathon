@@ -11,7 +11,7 @@ class AlertHistoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Riwayat Peringatan AI'),
+        title: const Text('AI Alert History'),
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -32,7 +32,7 @@ class AlertHistoryScreen extends StatelessWidget {
                       Icon(Icons.shield_outlined, size: 80, color: Colors.grey),
                       SizedBox(height: 16),
                       Text(
-                        'Tidak Ada Peringatan Saat Ini',
+                        'No Current Alerts',
                         style: TextStyle(fontSize: 18, color: Colors.grey),
                       ),
                     ],
@@ -81,9 +81,9 @@ class AlertHistoryScreen extends StatelessWidget {
               );
             }
             if (state is AlertError) {
-              return Center(child: Text('Terjadi Error: ${state.message}'));
+              return Center(child: Text('An Error Occurred: ${state.message}'));
             }
-            return const Center(child: Text('Silakan muat ulang data.'));
+            return const Center(child: Text('Please reload the data.'));
           },
         ),
       ),
@@ -94,7 +94,7 @@ class AlertHistoryScreen extends StatelessWidget {
           );
         },
         icon: const Icon(Icons.camera_alt),
-        label: const Text('Lapor Banjir'),
+        label: const Text('Report Flood'),
       ),
     );
   }

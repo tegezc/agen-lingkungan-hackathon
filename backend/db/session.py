@@ -15,7 +15,7 @@ try:
     # Coba buat koneksi untuk memvalidasi
     connection = engine.connect()
     connection.close()
-    print("Koneksi ke TiDB Cloud berhasil dibuat.")
+    print("Connection to TiDB Cloud established successfully.")
 except Exception as e:
-    print(f"Gagal membuat koneksi ke database: {e}")
+    print(f"Failed to create database connection: {e}")
     engine = None

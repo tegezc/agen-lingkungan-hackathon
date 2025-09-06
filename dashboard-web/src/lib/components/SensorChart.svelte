@@ -27,11 +27,11 @@
                     x: {
                         type: 'time',
                         time: { unit: 'second', displayFormats: { second: 'HH:mm:ss' } },
-                        title: { display: true, text: 'Waktu' }
+                        title: { display: true, text: 'Time' }
                     },
                     y: {
                         beginAtZero: false,
-                        title: { display: true, text: 'Ketinggian (cm)' }
+                        title: { display: true, text: 'Water Level (cm)' }
                     }
                 }
             }

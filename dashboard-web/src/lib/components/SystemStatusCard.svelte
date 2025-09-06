@@ -5,7 +5,7 @@
     let status = {
         status: 'loading', // default state
         level: 0,
-        message: 'Memuat status sistem...',
+        message: 'Loading system status...',
     };
     let intervalId;
 
@@ -42,7 +42,7 @@
             status = {
                 status: 'error',
                 level: -1,
-                message: `Gagal memuat: ${e.message}`,
+                message: `Failed to load: ${e.message}`,
             };
         }
     }
@@ -61,7 +61,7 @@
         <h2 class="status-title">{status.status.toUpperCase()}</h2>
         <p class="status-message">{status.message}</p>
         {#if status.level > 0}
-            <p class="status-level">Level Peringatan: {status.level}</p>
+            <p class="status-level">Alert Level: {status.level}</p>
         {/if}
     </div>
 </div>

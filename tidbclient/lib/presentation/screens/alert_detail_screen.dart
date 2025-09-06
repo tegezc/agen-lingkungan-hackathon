@@ -10,7 +10,7 @@ class AlertDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Detail Peringatan AI'),
+        title: const Text('AI Alert Details'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -18,7 +18,7 @@ class AlertDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Peringatan Level ${alert.level}',
+              'Alert Level ${alert.level}',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -27,12 +27,12 @@ class AlertDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Waktu: ${alert.timestamp.toLocal()}',
+              'Time: ${alert.timestamp.toLocal()}',
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
             const Divider(height: 32),
             const Text(
-              'Alasan & Analisis dari AI:',
+              'Reasoning & Analysis from AI:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
