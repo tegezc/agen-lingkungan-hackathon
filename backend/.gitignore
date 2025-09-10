@@ -61,7 +61,6 @@ Thumbs.db
 # dotenv / local settings
 # =========================
 .env
-.env.*
 *.env
 
 # =========================
