@@ -34,12 +34,12 @@ def get_latest_status():
             return {
                 "status": "safe",
                 "level": 0,
-                "message": "Semua sensor dalam kondisi normal."
+                "message": "All sensors are in normal condition."
             }
     except Exception as e:
         # Jika database error, kembalikan status tidak diketahui
         return {
             "status": "unknown",
             "level": -1,
-            "message": f"Gagal mengambil status: {e}"
+            "message": f"Failed to retrieve status: {e}"
         }

@@ -16,7 +16,7 @@
             type: 'line',
             data: {
                 datasets: [{
-                    label: 'Ketinggian Air (cm)',
+                    label: 'Water Level (cm)',
                     borderColor: 'rgb(75, 192, 192)',
                     tension: 0.1,
                     fill: false
