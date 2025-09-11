@@ -1,10 +1,35 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/status/status_bloc.dart';
 import 'alert_history_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Atur timer untuk memanggil event FetchStatus setiap 10 detik
+    _timer = Timer.periodic(const Duration(seconds: 10), (Timer t) {
+      context.read<StatusBloc>().add(FetchStatus());
+    });
+  }
+
+  @override
+  void dispose() {
+    // Selalu batalkan timer untuk mencegah memory leak
+    _timer?.cancel();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
