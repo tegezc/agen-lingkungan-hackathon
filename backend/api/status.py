@@ -11,7 +11,7 @@ def get_latest_status():
     untuk menentukan status sistem saat ini.
     """
     stmt = text("""
-        SELECT message, alert_level 
+        SELECT message, alert_level, feedback 
         FROM alerts 
         WHERE generated_at > NOW() - INTERVAL 3 HOUR 
         ORDER BY generated_at DESC 
@@ -23,6 +23,16 @@ def get_latest_status():
             latest_alert = connection.execute(stmt).fetchone()
         
         if latest_alert:
+
+             # Jika peringatan terakhir sudah ditandai sebagai 'false_alarm' oleh petugas,
+            # maka anggap kondisi saat ini aman.
+            if latest_alert.feedback == 'false_alarm':
+                return {
+                    "status": "safe",
+                    "level": 0,
+                    "message": "The last warning has been corrected as a False Alarm by the operator."
+                }
+            
             # Jika ada peringatan dalam 3 jam terakhir, kirim itu
             return {
                 "status": "danger",
