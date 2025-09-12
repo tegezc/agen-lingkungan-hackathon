@@ -1,4 +1,4 @@
-# agen-lingkungan-hackathon<div align="center">
+# <div align="center">
   <img src="assets/icon.png" alt="FloodCast Logo" width="150"/>
   <h1>FloodCast</h1>
   <p><strong>An Agentic AI for Predictive Flood Mitigation</strong></p>
@@ -22,7 +22,7 @@
 ---
 
 ## Table of Contents
-- [agen-lingkungan-hackathon](#agen-lingkungan-hackathon)
+- [](#)
     - [**Watch the Demo Video**](#watch-the-demo-video)
   - [Table of Contents](#table-of-contents)
   - [The Problem](#the-problem)
@@ -83,7 +83,7 @@ The core of FloodCast is a multi-step, automated workflow performed by our agent
 Our system is built with a modern, modular, service-oriented architecture designed for scalability and maintainability.
 
 
-<img src="assets/architecture.png" alt="FloodCast Architecture" width="600"/>
+<img src="assets/architecture.svg" alt="FloodCast Architecture" width="600"/>
 
 ## Tech Stack
 
@@ -94,6 +94,7 @@ Our system is built with a modern, modular, service-oriented architecture design
 * **Mobile App:** Flutter, Dart, BLoC
 * **Cloud & DevOps:** Google Cloud Run, Firebase (FCM), Git/GitHub
 * **External APIs:** OpenWeatherMap API
+  
 
 ## Getting Started
 
