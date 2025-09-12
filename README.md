@@ -118,14 +118,14 @@ pip install -r requirements.txt
 # Create a file named .env and fill in your credentials based on .env.example
 # Set GOOGLE_APPLICATION_CREDENTIALS to the path of your service account key
 
-# Run the API Server (Terminal 1) from the PROJECT ROOT
+# Run the API Server (Terminal 1) from backend directory
 uvicorn main:app --reload
 
-# Run the Agent Worker (Terminal 2) from the PROJECT ROOT
+# Run the Agent Worker (Terminal 2) from backend directory
 python -m run_agent
 
-# Run the Simulator (Terminal 3) from the PROJECT ROOT
-python simulator/simulator.py --scenario rising
+# Run the Simulator (Terminal 3) from the simulator directory
+python simulator.py --scenario rising
 ```
 
 ### 2. Web Dashboard Setup
