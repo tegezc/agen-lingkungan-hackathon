@@ -1,6 +1,7 @@
 import json
 import warnings
 import vertexai
+import requests
 from vertexai.generative_models import GenerativeModel
 from core import config
 
@@ -58,22 +59,23 @@ def get_llm_prediction(history_data, weather_data,examples=[]):
 # ------------------------------------------------------------
 # Fungsi prediksi multi-modal (teks + gambar)
 # ------------------------------------------------------------
-def analyze_report_with_vision(history_data, weather_data, image_path, notes,examples=[]):
+def analyze_report_with_vision(history_data, weather_data, image_url, notes,examples=[]):
     """
     Meminta prediksi multi-modal dari Gemini (Teks + Gambar)
     """
     print("Requesting multi-modal prediction from Gemini (Text + Image)...")
 
-    # 1. Baca data gambar dari file
     try:
-        with open(image_path, "rb") as f:
-            image_bytes = f.read()
+        # 1. Unduh data gambar dari URL publik GCS
+        response = requests.get(image_url, timeout=10)
+        response.raise_for_status()
+        image_bytes = response.content
         from vertexai.generative_models import Part
         image_part = Part.from_data(data=image_bytes, mime_type="image/jpeg")
     except Exception as e:
-        print(f"Failed to read image file: {e}")
+        print(f"Gagal mengunduh file gambar dari GCS: {e}")
         return None
-
+    
     # 2. Siapkan prompt teks
     history_str = ", ".join([f"{row.timestamp.strftime('%H:%M')}-{row.reading_value}cm"
                              for row in history_data])

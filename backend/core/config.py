@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+ENVIRONMENT = "production"
 # --- Database Config
 DB_HOST = os.getenv("DB_HOST")
 DB_USER = os.getenv("DB_USER")
@@ -27,3 +28,4 @@ WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")
 # --- Vertex AI Config
 GOOGLE_PROJECT_ID = os.getenv("GOOGLE_PROJECT_ID")
 GOOGLE_LOCATION = os.getenv("GOOGLE_LOCATION", "asia-southeast1")
+BUCKET_STORE = os.getenv("CLOUD_STORE_BUCKET")
