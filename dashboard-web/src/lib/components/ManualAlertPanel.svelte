@@ -17,7 +17,7 @@
         try {
             const result = await sendManualAlert(message);
             statusMessage = `Message sent successfully to ${result.sent_to} devices.`;
-            message = ''; // Kosongkan textarea setelah berhasil
+            message = '';
         } catch (e) {
             statusMessage = `Error: ${e.message}`;
         } finally {
@@ -54,7 +54,7 @@
         border: 1px solid #ccc;
         margin-bottom: 10px;
         min-height: 80px;
-        box-sizing: border-box; /* Important for width 100% */
+        box-sizing: border-box;
     }
     button {
         padding: 10px 15px;

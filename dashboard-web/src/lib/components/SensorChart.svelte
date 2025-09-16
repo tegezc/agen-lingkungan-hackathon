@@ -38,7 +38,7 @@
         });
 
         updateChart();
-        setInterval(updateChart, 5000); // Update setiap 5 detik
+        setInterval(updateChart, 5000); // Update each 5 seconds
     });
 
     async function updateChart() {

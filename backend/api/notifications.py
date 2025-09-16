@@ -13,37 +13,36 @@ class ManualNotificationPayload(BaseModel):
 
 @router.post("/manual")
 def send_manual_notification(payload: ManualNotificationPayload):
-    """Endpoint untuk petugas mengirim notifikasi manual ke semua perangkat."""
+    """Endpoint for officers to send manual notifications to all devices."""
     try:
-        print("Mencoba mengambil token dari database...")
+        print("Attempting to fetch tokens from the database...")
         with engine.connect() as connection:
             tokens_result = connection.execute(text("SELECT token FROM fcm_tokens")).fetchall()
             tokens = [row[0] for row in tokens_result]
         
         if not tokens:
-            print("Tidak ada token ditemukan.")
-            raise HTTPException(status_code=404, detail="Tidak ada perangkat terdaftar.")
+            print("No tokens found.")
+            raise HTTPException(status_code=404, detail="No registered devices found.")
 
-        print(f"Token ditemukan: {tokens}. Mencoba mengirim notifikasi...")
+        print(f"Tokens found: {tokens}. Attempting to send notification...")
         response = notification_service.send_multicast_notification(
             tokens=tokens,
-            title="❗ PEMBERITAHUAN PENTING DARI PETUGAS ❗",
+            title="❗ IMPORTANT NOTICE FROM OFFICER ❗",
             body=payload.message
         )
         
         if response and response.success_count > 0:
-            print("Notifikasi berhasil dikirim.")
+            print("Notification sent successfully.")
             return {"status": "sukses", "sent_to": response.success_count}
         else:
-            print("Fungsi notifikasi tidak mengembalikan respons sukses.")
+            print("Notification function did not return a success response.")
             # Ini mungkin tidak akan ter-raise jika error ada di dalam service
-            raise HTTPException(status_code=500, detail="Gagal mengirim notifikasi dari service.")
+            raise HTTPException(status_code=500, detail="Failed to send notification from the service.")
 
     except Exception as e:
-        # --- PENYADAP KITA ADA DI SINI ---
-        print("--- TERJADI ERROR DI ENDPOINT /notifications/manual ---")
-        traceback.print_exc() # Ini akan mencetak error asli ke konsol
+        print("--- AN ERROR OCCURRED AT THE /notifications/manual ENDPOINT ---")
+        traceback.print_exc() 
         print("-----------------------------------------------------")
         
-        # Kirim respons 500 yang generic, tapi kita sudah punya log-nya
+        # Send a generic 500 response, but we already have the logs
         raise HTTPException(status_code=500, detail=str(e))

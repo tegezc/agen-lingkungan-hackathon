@@ -7,8 +7,8 @@ router = APIRouter()
 @router.get("/latest")
 def get_latest_status():
     """
-    Mengambil peringatan terakhir yang aktif (dalam 3 jam terakhir) 
-    untuk menentukan status sistem saat ini.
+     Fetches the last active alert (within the last 3 hours) 
+    to determine the current system status.
     """
     stmt = text("""
         SELECT message, alert_level, feedback 
@@ -24,8 +24,8 @@ def get_latest_status():
         
         if latest_alert:
 
-             # Jika peringatan terakhir sudah ditandai sebagai 'false_alarm' oleh petugas,
-            # maka anggap kondisi saat ini aman.
+            # If the last alert has been marked as a 'false_alarm' by an officer,
+            # then consider the current condition to be safe.
             if latest_alert.feedback == 'false_alarm':
                 return {
                     "status": "safe",
@@ -33,21 +33,21 @@ def get_latest_status():
                     "message": "The last warning has been corrected as a False Alarm by the operator."
                 }
             
-            # Jika ada peringatan dalam 3 jam terakhir, kirim itu
+            # If there is an alert within the last 3 hours, send it
             return {
                 "status": "danger",
                 "level": latest_alert.alert_level,
                 "message": latest_alert.message
             }
         else:
-            # Jika tidak ada, berarti kondisi aman
+             # If there are none, it means the condition is safe
             return {
                 "status": "safe",
                 "level": 0,
                 "message": "All sensors are in normal condition."
             }
     except Exception as e:
-        # Jika database error, kembalikan status tidak diketahui
+         # If there's a database error, return an unknown status
         return {
             "status": "unknown",
             "level": -1,

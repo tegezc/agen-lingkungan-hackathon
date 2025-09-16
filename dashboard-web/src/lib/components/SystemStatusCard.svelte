@@ -14,10 +14,10 @@
     $: icon = getStatusIcon(status.status);
 
     function getCardColor(currentStatus, level) {
-        if (currentStatus === 'danger' && level >= 3) return '#dc3545'; // Merah (Bahaya)
-        if (currentStatus === 'danger' && level === 2) return '#ffc107'; // Kuning (Waspada)
-        if (currentStatus === 'safe') return '#28a745'; // Hijau (Aman)
-        return '#6c757d'; // Abu-abu (Memuat/Unknown)
+        if (currentStatus === 'danger' && level >= 3) return '#dc3545';
+        if (currentStatus === 'danger' && level === 2) return '#ffc107';
+        if (currentStatus === 'safe') return '#28a745'; 
+        return '#6c757d';
     }
 
     function getTextColor(currentStatus) {
@@ -30,7 +30,7 @@
     function getStatusIcon(currentStatus) {
         if (currentStatus === 'safe') return '✅';
         if (currentStatus === 'danger') return '⚠️';
-        return '🔄'; // Loading/Unknown
+        return '🔄';
     }
 
     async function fetchStatus() {
@@ -49,9 +49,9 @@
 
     onMount(() => {
         fetchStatus();
-        intervalId = setInterval(fetchStatus, 10000); // Perbarui setiap 10 detik
+        intervalId = setInterval(fetchStatus, 10000);
 
-        return () => clearInterval(intervalId); // Bersihkan interval saat komponen dihancurkan
+        return () => clearInterval(intervalId);
     });
 </script>
 

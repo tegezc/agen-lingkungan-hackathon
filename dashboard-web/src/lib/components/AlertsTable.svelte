@@ -20,22 +20,22 @@
     }
 
       async function handleFeedback(alertId, feedback) {
-        updatingId = alertId; // Set ID yang sedang diupdate
+        updatingId = alertId;
         try {
             await submitFeedback(alertId, feedback);
-            // Refresh tabel untuk menunjukkan perubahan
+            // Refresh table
             await updateTable(); 
         } catch (e) {
             console.error(e);
-            alert(`Gagal mengirim umpan balik: ${e.message}`);
+            alert(`Failed manual fedback: ${e.message}`);
         } finally {
-            updatingId = null; // Selesai, reset ID
+            updatingId = null;
         }
     }
 
     onMount(() => {
         updateTable();
-        setInterval(updateTable, 10000); // Refresh tabel setiap 10 detik
+        setInterval(updateTable, 10000); // Refresh table 10 second
     });
 </script>
 
@@ -92,17 +92,16 @@
     .feedback-buttons .false-alarm { background-color: #f8d7da; border-color: #f5c6cb;}
     button:disabled { cursor: not-allowed; opacity: 0.6; }
 
-    /* --- CSS BARU UNTUK SOROTAN WARNA BARIS --- */
     tr.warning {
-        background-color: #fff3cd; /* Kuning Waspada */
+        background-color: #fff3cd; 
     }
     tr.danger {
-        background-color: #f8d7da; /* Merah Bahaya */
+        background-color: #f8d7da; 
     }
     :global(tr.warning) {
-        background-color: #fff3cd !important; /* Kuning Waspada */
+        background-color: #fff3cd !important; 
     }
     :global(tr.danger) {
-        background-color: #f8d7da !important; /* Merah Bahaya */
+        background-color: #f8d7da !important; 
     }
 </style>

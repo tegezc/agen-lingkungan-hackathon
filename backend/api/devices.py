@@ -11,12 +11,12 @@ class RegisterTokenPayload(BaseModel):
 
 @router.post("/register", status_code=201)
 def register_device(payload: RegisterTokenPayload):
-    """Menerima dan menyimpan FCM token dari perangkat mobile."""
+    """Receives and stores an FCM token from a mobile device."""
     if not engine:
-        raise HTTPException(status_code=500, detail="Koneksi database tidak tersedia.")
+        raise HTTPException(status_code=500, detail="Database connection is not available.")
 
-    # Menggunakan "INSERT ... ON DUPLICATE KEY UPDATE" untuk menangani token yang sudah ada
-    # Ini adalah cara yang efisien untuk mendaftarkan atau meng-update timestamp token.
+     # Using "INSERT ... ON DUPLICATE KEY UPDATE" to handle existing tokens
+    # This is an efficient way to register or update a token's timestamp.
     stmt = text("""
         INSERT INTO fcm_tokens (token, created_at, updated_at) 
         VALUES (:token, NOW(3), NOW(3))
@@ -29,4 +29,4 @@ def register_device(payload: RegisterTokenPayload):
             connection.commit()
         return {"status": "sukses", "token": payload.token}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Gagal menyimpan token: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to save token: {e}")
