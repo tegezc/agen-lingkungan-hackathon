@@ -5,7 +5,7 @@ import json
 import random
 import argparse # Library untuk menerima argumen terminal
 
-BACKEND_URL = "http://127.0.0.1:8000/sensors/ingest"
+BACKEND_URL = "https://floodcast-service-669250331086.asia-southeast2.run.app/sensors/ingest"
 SENSOR_ID = "clw-ktl-01"
 
 def run_simulation(scenario):
