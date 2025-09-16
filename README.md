@@ -15,9 +15,7 @@
 
 **FloodCast** is an autonomous, multi-modal, and self-correcting ecosystem designed for proactive flood mitigation, built for the TiDB AgentX Hackathon 2025. At its core is an AI agent that works 24/7 to predict flood risks before they happen, learning from human feedback to improve its wisdom over time.
 
-### **[Watch the Demo Video](YOUTUBE_LINK_HERE)**
-
-*(Link to be added upon video completion)*
+### **[Watch the Demo Video](https://www.youtube.com/watch?v=9AhnFwh3HwU&t=111s)**
 
 ---
 
