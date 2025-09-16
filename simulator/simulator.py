@@ -18,9 +18,9 @@ def run_simulation(scenario):
             water_level = round(random.uniform(50.0, 70.0), 2)
         elif scenario == 'rising':
             water_level += 3.5
-            if water_level > 100: water_level = 100 # Batasi agar tidak terlalu tinggi
+            if water_level > 100: water_level = 100 # Limit it so it doesn't get too high
         elif scenario == 'ambiguous':
-            # Naik perlahan lalu stabil di level ambigu (misal 80-84 cm)
+            # Rise slowly then stabilize at an ambiguous level (e.g., 80-84 cm)
             if water_level < 80:
                 water_level += 2.0
             else:

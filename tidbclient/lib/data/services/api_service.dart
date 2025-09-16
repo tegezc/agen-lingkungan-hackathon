@@ -6,7 +6,6 @@ import '../models/alert.dart';
 import '../models/status.dart';
 
 class ApiService {
-  // Gunakan IP 10.0.2.2 untuk emulator Android mengakses localhost PC
   final String _baseUrl = 'https://floodcast-service-669250331086.asia-southeast2.run.app';
 
   Future<List<Alert>> fetchAlerts() async {
@@ -17,7 +16,7 @@ class ApiService {
       List<Alert> alerts = body.map((dynamic item) => Alert.fromJson(item)).toList();
       return alerts;
     } else {
-      throw Exception('Gagal memuat data alerts');
+      throw Exception('Failed to load alerts data');
     }
   }
 
@@ -30,12 +29,12 @@ class ApiService {
         body: json.encode({'token': token}),
       );
       if (response.statusCode != 201) {
-        // Jika gagal, lempar error agar bisa ditangkap oleh Repository/BLoC
+         // If it fails, throw an error so it can be caught by the Repository/BLoC
         throw Exception('Gagal registrasi token. Status: ${response.statusCode}');
       }
-      print('ApiService: Token berhasil dikirim ke server.');
+      print('ApiService: Token successfully sent to the server.');
     } catch (e) {
-      // Lempar kembali error untuk ditangani di lapisan atasnya
+     // Rethrow the error to be handled in the upper layer
       rethrow;
     }
   }
@@ -43,10 +42,10 @@ class ApiService {
   Future<void> uploadReport(File imageFile, String notes) async {
     final url = Uri.parse('$_baseUrl/reports/');
 
-    // Membuat request multi-bagian
+    // Create a multipart request
     var request = http.MultipartRequest('POST', url);
 
-    // Menambahkan file gambar
+     // Add the image file
     request.files.add(
       await http.MultipartFile.fromPath(
         'image', // 'image' harus cocok dengan nama field di backend
@@ -54,7 +53,7 @@ class ApiService {
       ),
     );
 
-    // Menambahkan data teks
+     // Add the text data
     request.fields['notes'] = notes;
 
     try {
@@ -62,9 +61,9 @@ class ApiService {
       final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode != 201) {
-        throw Exception('Gagal mengunggah laporan. Status: ${response.statusCode}');
+        throw Exception('Failed to upload report. Status: ${response.statusCode}');
       }
-      print('ApiService: Laporan berhasil diunggah.');
+      print('ApiService: Report uploaded successfully.');
     } catch (e) {
       rethrow;
     }
@@ -75,7 +74,7 @@ class ApiService {
     if (response.statusCode == 200) {
       return Status.fromJson(json.decode(response.body));
     } else {
-      throw Exception('Gagal memuat status terbaru');
+      throw Exception('Failed to load latest status');
     }
   }
 }

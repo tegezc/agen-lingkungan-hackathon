@@ -6,7 +6,7 @@ from core import config
 
 app = FastAPI(title="environment Agent API - Refactored")
 
-# Menambahkan Middleware CORS
+# Adding CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,12 +19,6 @@ app.add_middleware(
 def read_root():
     return {"status": f"Environment Agent API v2 is running."}
 
-# Di sini kita akan "include" router dari folder api/
-# app.include_router(ingest.router)
-# app.include_router(history.router)
-# app.include_router(notifications.router)
-
-# Untuk saat ini, kita bisa pindahkan endpoint lama ke sini agar tetap berfungsi
 from api import devices, sensors, alerts, notifications, reports, status
 app.include_router(devices.router, prefix="/devices", tags=["Devices"])
 app.include_router(sensors.router, prefix="/sensors", tags=["Sensors"])

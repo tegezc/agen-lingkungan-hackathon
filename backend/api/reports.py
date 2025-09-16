@@ -21,7 +21,7 @@ def create_report(
 ):
     file_extension = os.path.splitext(image.filename)[1]
     if file_extension.lower() not in ['.png', '.jpg', '.jpeg', '.webp']:
-        raise HTTPException(status_code=400, detail="Format file tidak didukung.")
+        raise HTTPException(status_code=400, detail="File format not supported.")
     
     bucket = storage_client.bucket(GCS_BUCKET_NAME)
 
@@ -30,12 +30,12 @@ def create_report(
 
     blob = bucket.blob(unique_filename)
     try:
-        # 1. Upload file langsung ke GCS
+        # 1. Upload the file directly to GCS
         blob.upload_from_file(image.file)
-        print(f"Gambar berhasil diunggah ke GCS: {blob.public_url}")
+        print(f"Image successfully uploaded to GCS: {blob.public_url}")
 
         blob.make_public()
-        # 2. Simpan URL publiknya ke TiDB
+        # 2. Save its public URL to TiDB
         stmt = text("INSERT INTO reports (image_url, notes) VALUES (:image_url, :notes)")
         with engine.connect() as connection:
             result = connection.execute(stmt, {"image_url": blob.public_url, "notes": notes})

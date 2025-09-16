@@ -17,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Atur timer untuk memanggil event FetchStatus setiap 10 detik
+    // Set a timer to call the FetchStatus event every 10 seconds
     _timer = Timer.periodic(const Duration(seconds: 10), (Timer t) {
       context.read<StatusBloc>().add(FetchStatus());
     });
@@ -25,7 +25,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    // Selalu batalkan timer untuk mencegah memory leak
     _timer?.cancel();
     super.dispose();
   }
@@ -33,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Tentukan warna dan ikon berdasarkan status
+    // Determine the color and icon based on the status
     Color statusColor = Colors.grey;
     IconData statusIcon = Icons.help_outline;
 

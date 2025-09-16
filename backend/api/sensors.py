@@ -22,12 +22,11 @@ class ReadingHistoryItem(BaseModel):
 class NotificationTestPayload(BaseModel):
     token: str
 
-# --- Endpoints ---
 @router.post("/ingest")
 def ingest_data(payload: SensorReadingPayload):
-    """Endpoint untuk menerima data sensor dan menyimpannya ke TiDB."""
+    """Endpoint to receive sensor data and save it to TiDB."""
     if not engine:
-        raise HTTPException(status_code=500, detail="Koneksi database tidak tersedia.")
+        raise HTTPException(status_code=500, detail="Database connection is not available.")
 
     try:
         with engine.connect() as connection:
@@ -41,21 +40,19 @@ def ingest_data(payload: SensorReadingPayload):
 
         return {"status": "sukses", "data_diterima": payload}
     except Exception as e:
-        # --- PERUBAHAN PENTING ADA DI SINI ---
-        # Print error asli dan traceback-nya ke konsol untuk debugging
-        print("--- TERJADI ERROR DATABASE ---")
+        print("--- ERROR DATABASE ---")
         traceback.print_exc()
         print("------------------------------")
         
         # Tetap kirim respons 500 ke simulator, tapi kita sudah punya log error-nya
-        raise HTTPException(status_code=500, detail=f"Gagal menyimpan data: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to save data: {str(e)}")
 
 
 @router.get("/{sensor_id}/history", response_model=list[ReadingHistoryItem])
 def get_sensor_history(sensor_id: str):
-    """Endpoint untuk mengambil 100 data terakhir dari sebuah sensor."""
+    """Endpoint to fetch the last 100 data points from a sensor."""
     if not engine:
-        raise HTTPException(status_code=500, detail="Koneksi database tidak tersedia.")
+        raise HTTPException(status_code=500, detail="Database connection is not available.")
 
     try:
         with engine.connect() as connection:
@@ -74,7 +71,7 @@ def get_sensor_history(sensor_id: str):
             result = connection.execute(stmt, {"id": sensor_id})
             history_rows = result.fetchall()
 
-            # Kita format ulang timestamp secara manual ke format ISO 8601 standar (dengan 'Z')
+            # Manually reformat the timestamp to standard ISO 8601 format (with 'Z')
             history = [
                 {
                     "reading_value": row.reading_value,
@@ -83,7 +80,6 @@ def get_sensor_history(sensor_id: str):
                 for row in history_rows
             ]
 
-            # Mengurutkan kembali agar data tertua di depan untuk grafik
             return history
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Gagal mengambil data: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch data: {e}")

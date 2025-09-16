@@ -19,7 +19,7 @@ def send_multicast_notification(tokens: list, title: str, body: str):
     failure_count = 0
     failed_tokens = []
 
-    # Iterasi melalui setiap token dan kirim notifikasi secara individual
+    # Iterate through each token and send a notification individually
     for token in tokens:
         message = messaging.Message(
             notification=messaging.Notification(title=title, body=body),
@@ -37,7 +37,7 @@ def send_multicast_notification(tokens: list, title: str, body: str):
     if failure_count > 0:
         print(f"Failed tokens: {failed_tokens}")
 
-    # Kita buat objek respons tiruan agar formatnya mirip
+    # Create a mock response object so the format is similar
     class MockResponse:
         def __init__(self, success, failure):
             self.success_count = success

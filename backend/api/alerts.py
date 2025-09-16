@@ -8,11 +8,11 @@ from db.session import engine
 router = APIRouter()
 
 class FeedbackPayload(BaseModel):
-    feedback: str # Akan berisi 'valid' atau 'false_alarm'
+    feedback: str # 'valid' or 'false_alarm'
 
 @router.get("/alerts")
 def get_all_alerts():
-    """Mengambil 20 catatan peringatan terakhir dari database."""
+    """Fetches the last 20 alert records from the database."""
     stmt = text("SELECT id, generated_at, message, alert_level, confidence_score, feedback FROM alerts ORDER BY generated_at DESC LIMIT 20")
     try:
         with engine.connect() as connection:
@@ -30,39 +30,37 @@ def get_all_alerts():
             ]
             return alerts
     except Exception as e:
-         # --- PENYADAP KITA ADA DI SINI ---
-        print("--- TERJADI ERROR DI ENDPOINT /alerts/ ---")
-        traceback.print_exc() # Ini akan mencetak error asli ke konsol
+        print("--- AN ERROR OCCURRED AT THE /alerts/alerts ENDPOINT ---")
+        traceback.print_exc()
         print("-----------------------------------------------------")
-        raise HTTPException(status_code=500, detail=f"Gagal mengambil data alert: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch alert data: {e}")
 
 @router.post("/{alert_id}/feedback")
 def submit_feedback(alert_id: str, payload: FeedbackPayload):
-    """Menerima umpan balik dari petugas untuk sebuah peringatan."""
+    """"Receives feedback from an officer for an alert."""
     if payload.feedback not in ['valid', 'false_alarm']:
         raise HTTPException(status_code=400, detail="Feedback tidak valid.")
 
     stmt = text("UPDATE alerts SET feedback = :feedback WHERE id = :id")
     try:
         with engine.connect() as connection:
-            # 1. Jalankan perintah dan simpan hasilnya
+            # 1. Execute the command and store the result
             result = connection.execute(stmt, {"feedback": payload.feedback, "id": alert_id})
 
-            # 2. PERIKSA APAKAH ADA BARIS YANG BERUBAH
+            # 2. CHECK IF ANY ROWS WERE AFFECTED
             if result.rowcount == 0:
-                # Jika tidak ada, berarti ID tidak ditemukan. Kirim error 404.
-                raise HTTPException(status_code=404, detail=f"Alert dengan ID {alert_id} tidak ditemukan.")
+               # If not, it means the ID was not found. Send a 404 error.
+                raise HTTPException(status_code=404, detail=f"Alert with ID {alert_id} not found.")
 
-            # 3. Jika berhasil, commit perubahan
+            # 3. If successful, commit the changes
             connection.commit()
 
         return {"status": "sukses", "alert_id": alert_id, "feedback": payload.feedback}
     except HTTPException as http_exc:
-        # Pastikan HTTPException yang kita buat sendiri tidak tertangkap oleh blok di bawah
+         # Make sure the HTTPException we created ourselves is not caught by the block below
         raise http_exc
     except Exception as e:
-           # --- PENYADAP KITA ADA DI SINI ---
-        print("--- TERJADI ERROR DI ENDPOINT /alerts/ ---")
-        traceback.print_exc() # Ini akan mencetak error asli ke konsol
+        print("---AN ERROR OCCURRED AT THE /feedback ENDPOINT ---")
+        traceback.print_exc()
         print("-----------------------------------------------------")
-        raise HTTPException(status_code=500, detail=f"Gagal menyimpan feedback: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to save feedback: {e}")

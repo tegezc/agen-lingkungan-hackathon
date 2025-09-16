@@ -13,22 +13,22 @@ class NotificationRepository {
 
   Future<void> registerDevice() async {
     try {
-      // 1. Minta izin
+      // 1. Request permission
       await _firebaseMessaging.requestPermission();
 
-      // 2. Dapatkan token
+      // 2. Get the token
       final fcmToken = await _firebaseMessaging.getToken();
 
-      // 3. Kirim ke server jika token ada
+      // 3. Send to the server if the token exists
       if (fcmToken != null) {
-        print("Token ditemukan, mendaftarkan ke server: $fcmToken");
+         print("Token found, registering to server: $fcmToken");
         await _apiService.registerToken(fcmToken);
       } else {
-        print("Gagal mendapatkan FCM Token untuk registrasi.");
+        print("Failed to get FCM Token for registration.");
       }
     } catch (e) {
-      print("Error dalam proses registrasi perangkat: $e");
-      // Di aplikasi produksi, kita akan menangani error ini lebih baik
+     print("Error during the device registration process: $e");
+       // In a production app, we would handle this error better
       rethrow;
     }
   }

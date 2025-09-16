@@ -6,29 +6,29 @@ from vertexai.generative_models import GenerativeModel
 from core import config
 
 # ------------------------------------------------------------
-# Inisialisasi Vertex AI
+# initialitation Vertex AI
 # ------------------------------------------------------------
 vertexai.init(project=config.GOOGLE_PROJECT_ID, location=config.GOOGLE_LOCATION)
 
-# Buat model Gemini
+# Create the Gemini model
 model = GenerativeModel("gemini-2.5-pro")
 
-# Optional: hilangkan deprecation warning sementara
+# Optional: temporarily suppress the deprecation warning
 warnings.filterwarnings("ignore", category=UserWarning, module="vertexai.generative_models")
 
 # ------------------------------------------------------------
-# Fungsi prediksi teks saja
+# Text-only prediction function
 # ------------------------------------------------------------
 def get_llm_prediction(history_data, weather_data,examples=[]):
     """
-    Meminta prediksi dari Gemini dan mem-parsing output JSON-nya.
+    Requests a prediction from Gemini and parses its JSON output.
     """
     print("Requesting prediction from Gemini (text)...")
 
     history_str = ", ".join([f"{row.timestamp.strftime('%H:%M')}-{row.reading_value}cm"
                              for row in history_data])
     
-    examples_str = "\n".join([f"- Kasus: {ex.message}, Umpan Balik Manusia: {ex.feedback}" for ex in examples])
+    examples_str = "\n".join([f"- Case: {ex.message}, Human Feedback: {ex.feedback}" for ex in examples])
     prompt = f"""
     You are a senior hydrologist and risk analyst. Your task is to predict flood potential based on sensor and weather data.
 
@@ -57,26 +57,26 @@ def get_llm_prediction(history_data, weather_data,examples=[]):
         return None
 
 # ------------------------------------------------------------
-# Fungsi prediksi multi-modal (teks + gambar)
+# Multi-modal prediction function (text + image)
 # ------------------------------------------------------------
 def analyze_report_with_vision(history_data, weather_data, image_url, notes,examples=[]):
     """
-    Meminta prediksi multi-modal dari Gemini (Teks + Gambar)
+    Requests a multi-modal prediction from Gemini (Text + Image).
     """
     print("Requesting multi-modal prediction from Gemini (Text + Image)...")
 
     try:
-        # 1. Unduh data gambar dari URL publik GCS
+         # 1. Download the image data from the public GCS URL
         response = requests.get(image_url, timeout=10)
         response.raise_for_status()
         image_bytes = response.content
         from vertexai.generative_models import Part
         image_part = Part.from_data(data=image_bytes, mime_type="image/jpeg")
     except Exception as e:
-        print(f"Gagal mengunduh file gambar dari GCS: {e}")
+        print(f"Failed to download the image file from GCS: {e}")
         return None
     
-    # 2. Siapkan prompt teks
+     # 2. Prepare the text prompt
     history_str = ", ".join([f"{row.timestamp.strftime('%H:%M')}-{row.reading_value}cm"
                              for row in history_data])
     
@@ -105,7 +105,7 @@ def analyze_report_with_vision(history_data, weather_data, image_url, notes,exam
     print("---------------------------------")
 
     try:
-        # 3. Kirim prompt teks DAN gambar ke Gemini
+         # 3. Send the text prompt AND the image to Gemini
         response = model.generate_content([image_part, prompt])
         clean_response = response.text.replace("```json", "").replace("```", "").strip()
         print(f"Multi-modal Response from LLM: {clean_response}")

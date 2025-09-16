@@ -33,11 +33,11 @@ def run_agent():
             prediction_result = None
             
             with engine.connect() as connection:
-                # 1. AMBIL DATA UTAMA (SENSOR & CUACA)
+                 # 1. FETCH PRIMARY DATA (SENSOR & WEATHER)
                 stmt_sensor_info = text("SELECT latitude, longitude FROM sensors WHERE id = :id")
                 sensor_info = connection.execute(stmt_sensor_info, {"id": config.SENSOR_ID_TEST}).fetchone()
 
-                 # --- QUERY BARU: Ambil Contoh Kasus ---
+                # --- NEW QUERY: Fetch Case Examples -
                 stmt_examples = text("SELECT message, feedback FROM alerts WHERE feedback IS NOT NULL ORDER BY generated_at DESC LIMIT 3")
                 examples = connection.execute(stmt_examples).fetchall()
                 
@@ -55,27 +55,27 @@ def run_agent():
 
                 weather_data = get_weather_forecast(sensor_info.latitude, sensor_info.longitude, config.WEATHER_API_KEY)
 
-                # 2. CEK & PROSES LAPORAN VISUAL (JIKA ADA)
+               # 2. CHECK & PROCESS VISUAL REPORTS (IF ANY)
                 stmt_reports = text("SELECT id, image_url, notes FROM reports WHERE status = 'pending_analysis' ORDER BY created_at ASC LIMIT 1")
                 new_report = connection.execute(stmt_reports).fetchone()
 
                 if new_report:
                     print(f"New report found (ID: {new_report.id}). Using multi-modal analysis...")
-                    # Panggil LLM dengan gambar
+                    # Call the LLM with the image
                     prediction_result = llm_service.analyze_report_with_vision(
                         history_data, weather_data, new_report.image_url, new_report.notes, examples=examples
                     )
                     
-                    # Update status laporan agar tidak dianalisis lagi
+                    # Update the report status so it's not analyzed again
                     stmt_update = text("UPDATE reports SET status = 'analyzed' WHERE id = :id")
                     connection.execute(stmt_update, {"id": new_report.id})
                     connection.commit()
                 else:
-                    # 3. JIKA TIDAK ADA LAPORAN, GUNAKAN ANALISIS TEKS-SAJA
+                   # 3. IF NO REPORT, USE TEXT-ONLY ANALYSIS
                     print("No new reports. Using text-based predictive analysis.")
                     prediction_result = llm_service.get_llm_prediction(history_data, weather_data, examples=examples)
 
-            # 4. AMBIL TINDAKAN BERDASARKAN HASIL PREDIKSI
+            # 4. TAKE ACTION BASED ON THE PREDICTION RESULT
             if prediction_result and prediction_result.get("is_danger_predicted"):
                 print("!!! DANGER PREDICTION RECEIVED !!!")
                 reason = prediction_result.get('reasoning', 'AI predicts potential danger.')
@@ -105,13 +105,13 @@ def run_agent():
                             "id": config.SENSOR_ID_TEST, 
                             "level": alert_level, 
                             "msg": reason,
-                            "confidence": confidence # <-- Kirim nilai confidence sebagai parameter
+                            "confidence": confidence
                         }
                     )
                     connection.commit()
                 print("Condition predicted to be safe.")
                 
-                # Setelah mengirim notifikasi penting, tunggu lebih lama.
+                 # After sending an important notification, wait longer.
                 time.sleep(180) 
             else:
                 print("Condition predicted to be safe.")
