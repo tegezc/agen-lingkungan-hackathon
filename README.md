@@ -33,9 +33,10 @@
   - [Tech Stack](#tech-stack)
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
-    - [1. Backend \& Simulator Setup](#1-backend--simulator-setup)
-    - [2. Web Dashboard Setup](#2-web-dashboard-setup)
-    - [3. Mobile App (Flutter) Setup](#3-mobile-app-flutter-setup)
+    - [1. Backend](#1-backend)
+    - [2. Simulator and Agent FloodCast](#2-simulator-and-agent-floodcast)
+    - [3. Web Dashboard Setup](#3-web-dashboard-setup)
+    - [4. Mobile App (Flutter) Setup](#4-mobile-app-flutter-setup)
   - [Challenges \& Learnings](#challenges--learnings)
   - [Future Roadmap](#future-roadmap)
   - [Database Schema](#database-schema)
@@ -101,7 +102,41 @@ Our system is built with a modern, modular, service-oriented architecture design
 ### Prerequisites
 * Python 3.11+, Node.js & npm, Flutter SDK, Git
 
-### 1. Backend & Simulator Setup
+### 1. Backend
+The backend consists of a FastAPI API server and a standalone Python Agent Worker.
+
+**a. Google Cloud Setup:**
+
+1.  **Enable APIs:** In your Google Cloud project, ensure the **Vertex AI API** is enabled.
+2.  **Create a Service Account:** Create a service account with the **"Vertex AI User"** role and download its JSON key file.
+3.  **Create a GCS Bucket:**
+    * Go to Google Cloud Storage and create a new bucket.
+    * During setup, for "Access control," choose **"Fine-grained"**.
+    * **Uncheck** the box for "Enforce public access prevention". This allows the agent to read the uploaded images via a public URL for the demo.
+
+**b. Local Environment Setup:**
+
+```bash
+# Navigate to the backend directory
+cd backend
+
+# Create and activate a virtual environment
+# On Windows:
+python -m venv .venv
+.\.venv\Scripts\activate
+
+# Install dependencies (ensure google-cloud-storage is listed)
+pip install -r requirements.txt
+
+# Create a .env file and fill in your credentials.
+# It should now include CLOUD_STORE_BUCKET.
+# Example: CLOUD_STORE_BUCKET="your-unique-bucket-name"
+
+# Set the GOOGLE_APPLICATION_CREDENTIALS environment variable
+# to the path of your downloaded service account JSON key file.
+```
+
+### 2. Simulator and Agent FloodCast
 ```bash
 # From the project root, navigate to the backend
 cd backend
@@ -116,10 +151,6 @@ pip install -r requirements.txt
 
 # Create a .env file from the example
 # Create a file named .env and fill in your credentials based on .env.example
-# Set GOOGLE_APPLICATION_CREDENTIALS to the path of your service account key
-
-# Run the API Server (Terminal 1) from backend directory
-uvicorn main:app --reload
 
 # Run the Agent Worker (Terminal 2) from backend directory
 python -m run_agent
@@ -127,8 +158,7 @@ python -m run_agent
 # Run the Simulator (Terminal 3) from the simulator directory
 python simulator.py --scenario rising
 ```
-
-### 2. Web Dashboard Setup
+### 3. Web Dashboard Setup
 
 ```bash
 # From the project root, navigate to the web dashboard
@@ -141,7 +171,7 @@ npm install
 npm run dev
 ```
 
-### 3. Mobile App (Flutter) Setup
+### 4. Mobile App (Flutter) Setup
 
 1. Navigate to the tidbclient directory.
 
