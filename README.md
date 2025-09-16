@@ -91,7 +91,7 @@ Our system is built with a modern, modular, service-oriented architecture design
 * **AI Core:** Google Cloud Vertex AI (Gemini 2.5 Pro)
 * **Web Dashboard:** SvelteKit, JavaScript, Chart.js
 * **Mobile App:** Flutter, Dart, BLoC
-* **Cloud & DevOps:** Google Cloud Run, Firebase (FCM), Git/GitHub
+* **Cloud & DevOps:** Google Cloud Run, Firebase (FCM & Hosting), Git/GitHub
 * **External APIs:** OpenWeatherMap API
   
 
