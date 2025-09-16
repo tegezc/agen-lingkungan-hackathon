@@ -10,7 +10,7 @@ router = APIRouter()
 class FeedbackPayload(BaseModel):
     feedback: str # Akan berisi 'valid' atau 'false_alarm'
 
-@router.get("/")
+@router.get("/alerts")
 def get_all_alerts():
     """Mengambil 20 catatan peringatan terakhir dari database."""
     stmt = text("SELECT id, generated_at, message, alert_level, confidence_score, feedback FROM alerts ORDER BY generated_at DESC LIMIT 20")
