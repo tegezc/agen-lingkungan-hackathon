@@ -1,6 +1,6 @@
 // src/lib/services/api.js
 
-const BASE_URL = 'http://127.0.0.1:8000';
+const BASE_URL = 'https://floodcast-service-669250331086.asia-southeast2.run.app';
 
 /**
  * Mengambil data histori sensor dari backend
@@ -20,7 +20,7 @@ export async function getHistory(sensorId) {
  * @returns {Promise<any[]>}
  */
 export async function getAlerts() {
-    const response = await fetch(`${BASE_URL}/alerts`);
+    const response = await fetch(`${BASE_URL}/alerts/alerts`);
     if (!response.ok) {
         throw new Error('Gagal memuat data peringatan');
     }
