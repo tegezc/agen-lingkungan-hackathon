@@ -5,13 +5,14 @@ import uuid
 import traceback
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from sqlalchemy import text
+from google.cloud import storage
 from db.session import engine
+from core import config
 
 router = APIRouter()
-UPLOADS_DIR = "uploads"
 
-# Pastikan folder uploads ada
-os.makedirs(UPLOADS_DIR, exist_ok=True)
+GCS_BUCKET_NAME = config.BUCKET_STORE
+storage_client = storage.Client()
 
 @router.post("/", status_code=201)
 def create_report(
@@ -22,44 +23,27 @@ def create_report(
     if file_extension.lower() not in ['.png', '.jpg', '.jpeg', '.webp']:
         raise HTTPException(status_code=400, detail="Format file tidak didukung.")
     
+    bucket = storage_client.bucket(GCS_BUCKET_NAME)
+
+    file_extension = os.path.splitext(image.filename)[1]
     unique_filename = f"{uuid.uuid4()}{file_extension}"
-    save_path = os.path.join(UPLOADS_DIR, unique_filename)
 
+    blob = bucket.blob(unique_filename)
     try:
-        # 1. Simpan file gambar ke server
-        print("Mencoba menyimpan file gambar...")
-        with open(save_path, "wb") as buffer:
-            shutil.copyfileobj(image.file, buffer)
-        print(f"File berhasil disimpan di: {save_path}")
+        # 1. Upload file langsung ke GCS
+        blob.upload_from_file(image.file)
+        print(f"Gambar berhasil diunggah ke GCS: {blob.public_url}")
 
-        # 2. Simpan informasi laporan ke database TiDB
-        if not engine:
-            raise HTTPException(status_code=500, detail="Koneksi database tidak tersedia.")
-
-        print("Mencoba menyimpan catatan ke database...")
-        stmt = text("""
-            INSERT INTO reports (image_url, notes, status) 
-            VALUES (:image_url, :notes, 'pending_analysis')
-        """)
+        blob.make_public()
+        # 2. Simpan URL publiknya ke TiDB
+        stmt = text("INSERT INTO reports (image_url, notes) VALUES (:image_url, :notes)")
         with engine.connect() as connection:
-            result = connection.execute(
-                stmt, 
-                {"image_url": save_path, "notes": notes}
-            )
+            result = connection.execute(stmt, {"image_url": blob.public_url, "notes": notes})
             connection.commit()
-        print("Catatan berhasil disimpan ke database.")
-        return {"status": "sukses", "report_id": result.lastrowid, "file_path": save_path}
+        return {"status": "sukses", "report_id": result.lastrowid, "file_url": blob.public_url}
 
     except Exception as e:
-        # --- PENYADAP KITA ADA DI SINI ---
-        print("--- TERJADI ERROR DI ENDPOINT /reports ---")
-        traceback.print_exc() # Ini akan mencetak error asli ke konsol
-        print("------------------------------------------")
-
-        # Jika file sudah sempat dibuat, hapus lagi agar tidak ada sampah
-        if os.path.exists(save_path):
-            os.remove(save_path)
-
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Terjadi kesalahan internal: {str(e)}")
     finally:
         image.file.close()

@@ -33,7 +33,7 @@ def ingest_data(payload: SensorReadingPayload):
         with engine.connect() as connection:
             stmt = text("""
                 INSERT INTO sensor_readings (sensor_id, reading_value, reading_unit, timestamp)
-                VALUES (:sensor_id, :reading_value, :reading_unit, NOW(3))
+                VALUES (:sensor_id, :reading_value, :reading_unit, UTC_TIMESTAMP(3))
             """)
             
             connection.execute(stmt, payload.dict())
@@ -60,17 +60,30 @@ def get_sensor_history(sensor_id: str):
     try:
         with engine.connect() as connection:
             stmt = text("""
-                SELECT reading_value, timestamp FROM sensor_readings
-                WHERE sensor_id = :id
-                ORDER BY timestamp DESC
+                SELECT reading_value, timestamp 
+                FROM sensor_readings
+                WHERE 
+                    sensor_id = :id AND
+                    timestamp >= (
+                        SELECT MAX(timestamp) FROM sensor_readings WHERE sensor_id = :id
+                    ) - INTERVAL 6 HOUR
+                ORDER BY timestamp ASC
                 LIMIT 100
             """)
             
             result = connection.execute(stmt, {"id": sensor_id})
-            history = result.fetchall()
-            
-            # Mengurutkan kembali agar data tertua di depan untuk grafik
-            return sorted(history, key=lambda x: x.timestamp)
+            history_rows = result.fetchall()
 
+            # Kita format ulang timestamp secara manual ke format ISO 8601 standar (dengan 'Z')
+            history = [
+                {
+                    "reading_value": row.reading_value,
+                    "timestamp": row.timestamp.isoformat() + "Z"
+                }
+                for row in history_rows
+            ]
+
+            # Mengurutkan kembali agar data tertua di depan untuk grafik
+            return history
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Gagal mengambil data: {e}")
