@@ -7,10 +7,10 @@ import '../models/status.dart';
 
 class ApiService {
   // Gunakan IP 10.0.2.2 untuk emulator Android mengakses localhost PC
-  final String _baseUrl = 'http://10.0.2.2:8000';
+  final String _baseUrl = 'https://floodcast-service-669250331086.asia-southeast2.run.app';
 
   Future<List<Alert>> fetchAlerts() async {
-    final response = await http.get(Uri.parse('$_baseUrl/alerts/'));
+    final response = await http.get(Uri.parse('$_baseUrl/alerts/alerts'));
 
     if (response.statusCode == 200) {
       List<dynamic> body = json.decode(response.body);
